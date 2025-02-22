@@ -1,102 +1,41 @@
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "1.9.25"
-    id("org.jetbrains.kotlin.plugin.spring") version "1.9.25"
-    id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
-    id("org.springframework.boot") version "3.4.3"
-    id("io.spring.dependency-management") version "1.1.7"
-    id("org.jooq.jooq-codegen-gradle") version "3.19.20"
-    id("org.flywaydb.flyway") version "11.3.3"
+    id("org.jetbrains.kotlin.jvm") version "1.9.25" apply(false)
+    id("org.jetbrains.kotlin.plugin.spring") version "1.9.25" apply(false)
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.2" apply(false)
+    id("org.springframework.boot") version "3.4.3" apply(false)
+    id("io.spring.dependency-management") version "1.1.7" apply(false)
+    id("org.jooq.jooq-codegen-gradle") version "3.19.20" apply(false)
+    id("org.flywaydb.flyway") version "11.3.3" apply(false)
 }
 
-group = "com.demo.project"
-version = "0.0.1-SNAPSHOT"
+allprojects {
+    group = "com.demo.project.librarystore"
+    version = "0.0.1-SNAPSHOT"
+}
 
-def generatedSourcesDir = layout.buildDirectory.dir("generated-sources/jooq")
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+subprojects {
+    repositories {
+        mavenCentral()
     }
-}
-
-ktlint {
-    version = "1.5.0"
-    verbose = true
-    filter {
-        exclude {
-            generatedSourcesDir
+    apply {
+        plugin("org.jetbrains.kotlin.jvm")
+        plugin("org.jlleitschuh.gradle.ktlint")
+    }
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
         }
     }
-}
-
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
+    ktlint {
+        version = "1.5.0"
+        verbose = true
     }
-}
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    implementation "org.springframework.boot:spring-boot-starter-jooq"
-    implementation "org.springframework.boot:spring-boot-starter-web"
-    implementation "com.fasterxml.jackson.module:jackson-module-kotlin"
-    implementation "org.flywaydb:flyway-core"
-    implementation "org.flywaydb:flyway-database-postgresql"
-    implementation "org.jetbrains.kotlin:kotlin-reflect"
-    implementation "org.apache.logging.log4j:log4j-slf4j-impl"
-    compileOnly "org.projectlombok:lombok"
-    developmentOnly "org.springframework.boot:spring-boot-docker-compose"
-    runtimeOnly "org.postgresql:postgresql"
-    jooqCodegen "org.postgresql:postgresql"
-    annotationProcessor "org.projectlombok:lombok"
-    testImplementation "org.springframework.boot:spring-boot-starter-test"
-    testImplementation "org.jetbrains.kotlin:kotlin-test-junit5"
-    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
-}
-
-kotlin {
-    compilerOptions {
-        freeCompilerArgs.addAll "-Xjsr305=strict"
-    }
-}
-
-tasks.named("test") {
-    useJUnitPlatform()
-}
-
-sourceSets.main {
-    java.srcDirs(generatedSourcesDir)
-}
-
-jooq {
-    configuration {
-        jdbc {
-            driver = "org.postgresql.Driver"
-            url = "jdbc:postgresql://localhost:5432/libstore"
-            user = "myuser"
-            password = "mypassword"
-        }
-        generator {
-            name = "org.jooq.codegen.KotlinGenerator"
-            database {
-                name = "org.jooq.meta.postgres.PostgresDatabase"
-                includes = ".*"
-                inputSchema = "public"
-            }
-            target {
-                distsDirectory = generatedSourcesDir
-                packageName = "com.demo.project.librarystore.jooq.generated"
-            }
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.add("-Xjsr305=strict")
         }
     }
-}
-
-flyway {
-    driver = "org.postgresql.Driver"
-    url = "jdbc:postgresql://localhost:5432/libstore"
-    user = "myuser"
-    password = "mypassword"
+    tasks.named("test") {
+        useJUnitPlatform()
+    }
 }

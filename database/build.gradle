@@ -1,0 +1,63 @@
+apply {
+    plugin("org.jooq.jooq-codegen-gradle")
+    plugin("org.flywaydb.flyway")
+    plugin("org.springframework.boot")
+    plugin("io.spring.dependency-management")
+}
+
+def jooqGeneratedDir = layout.buildDirectory.dir("generated-sources/jooq")
+def jooqGeneratedPackageName = "com.demo.project.librarystore.jooq.generated"
+
+dependencies {
+    implementation "org.jooq:jooq"
+    implementation "org.flywaydb:flyway-core"
+    implementation "org.flywaydb:flyway-database-postgresql"
+    runtimeOnly "org.postgresql:postgresql"
+    jooqCodegen "org.postgresql:postgresql"
+}
+
+compileKotlin {
+    dependsOn jooqCodegen
+}
+
+sourceSets.main {
+    java.srcDirs(jooqGeneratedDir)
+}
+
+jooq {
+    configuration {
+        jdbc {
+            driver = "org.postgresql.Driver"
+            url = "jdbc:postgresql://localhost:5432/libstore"
+            user = "myuser"
+            password = "mypassword"
+        }
+        generator {
+            name = "org.jooq.codegen.KotlinGenerator"
+            database {
+                name = "org.jooq.meta.postgres.PostgresDatabase"
+                includes = ".*"
+                inputSchema = "public"
+            }
+            target {
+                distsDirectory = jooqGeneratedDir
+                packageName = jooqGeneratedPackageName
+            }
+        }
+    }
+}
+
+flyway {
+    driver = "org.postgresql.Driver"
+    url = "jdbc:postgresql://localhost:5432/libstore"
+    user = "myuser"
+    password = "mypassword"
+}
+
+ktlint {
+    filter {
+        exclude {
+            jooqGeneratedDir
+        }
+    }
+}
