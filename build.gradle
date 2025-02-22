@@ -11,6 +11,8 @@ plugins {
 group = "com.demo.project"
 version = "0.0.1-SNAPSHOT"
 
+def generatedSourcesDir = layout.buildDirectory.dir("generated-sources/jooq")
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
@@ -20,6 +22,11 @@ java {
 ktlint {
     version = "1.5.0"
     verbose = true
+    filter {
+        exclude {
+            generatedSourcesDir
+        }
+    }
 }
 
 configurations {
@@ -60,6 +67,10 @@ tasks.named("test") {
     useJUnitPlatform()
 }
 
+sourceSets.main {
+    java.srcDirs(generatedSourcesDir)
+}
+
 jooq {
     configuration {
         jdbc {
@@ -69,13 +80,15 @@ jooq {
             password = "mypassword"
         }
         generator {
+            name = "org.jooq.codegen.KotlinGenerator"
             database {
                 name = "org.jooq.meta.postgres.PostgresDatabase"
                 includes = ".*"
                 inputSchema = "public"
             }
             target {
-                packageName = "com.demo.project.librarystore.jooq"
+                distsDirectory = generatedSourcesDir
+                packageName = "com.demo.project.librarystore.jooq.generated"
             }
         }
     }
