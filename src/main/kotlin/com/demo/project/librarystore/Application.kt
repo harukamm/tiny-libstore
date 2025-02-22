@@ -4,8 +4,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-class LibraryStoreDemoApplication
+class Application
 
 fun main(args: Array<String>) {
-    runApplication<LibraryStoreDemoApplication>(*args)
+    runApplication<Application>(*args)
 }
