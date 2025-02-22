@@ -2,13 +2,14 @@ services:
   postgres:
     image: 'postgres:17.4'
     environment:
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=secret'
+      - 'POSTGRES_DB=libstore'
+      - 'POSTGRES_PASSWORD=mypassword'
       - 'POSTGRES_USER=myuser'
+      - 'TZ=Asia/Tokyo'
     ports:
-      - '5432'
+      - '5432:5432'
     volumes:
       - libstore-data:/var/lib/postgresql/data
-
+      - ./src/main/resources/db/migration:/docker-entrypoint-initdb.d
 volumes:
   libstore-data:

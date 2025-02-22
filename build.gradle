@@ -5,6 +5,7 @@ plugins {
     id("org.springframework.boot") version "3.4.3"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.jooq.jooq-codegen-gradle") version "3.19.20"
+    id("org.flywaydb.flyway") version "11.3.3"
 }
 
 group = "com.demo.project"
@@ -38,9 +39,11 @@ dependencies {
     implementation "org.flywaydb:flyway-core"
     implementation "org.flywaydb:flyway-database-postgresql"
     implementation "org.jetbrains.kotlin:kotlin-reflect"
+    implementation "org.apache.logging.log4j:log4j-slf4j-impl"
     compileOnly "org.projectlombok:lombok"
     developmentOnly "org.springframework.boot:spring-boot-docker-compose"
     runtimeOnly "org.postgresql:postgresql"
+    jooqCodegen "org.postgresql:postgresql"
     annotationProcessor "org.projectlombok:lombok"
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit5"
@@ -55,4 +58,32 @@ kotlin {
 
 tasks.named("test") {
     useJUnitPlatform()
+}
+
+jooq {
+    configuration {
+        jdbc {
+            driver = "org.postgresql.Driver"
+            url = "jdbc:postgresql://localhost:5432/libstore"
+            user = "myuser"
+            password = "mypassword"
+        }
+        generator {
+            database {
+                name = "org.jooq.meta.postgres.PostgresDatabase"
+                includes = ".*"
+                inputSchema = "public"
+            }
+            target {
+                packageName = "com.demo.project.librarystore.jooq"
+            }
+        }
+    }
+}
+
+flyway {
+    driver = "org.postgresql.Driver"
+    url = "jdbc:postgresql://localhost:5432/libstore"
+    user = "myuser"
+    password = "mypassword"
 }
