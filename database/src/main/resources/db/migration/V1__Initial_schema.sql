@@ -7,7 +7,7 @@ CREATE TABLE author (
 CREATE TABLE book (
     id INT NOT NULL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
-    price INT CHECK (price >= 0),
+    price INT NOT NULL CHECK (price >= 0),
     published_status SMALLINT DEFAULT '0'
 );
 

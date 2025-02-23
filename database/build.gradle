@@ -2,7 +2,6 @@ apply {
     plugin("org.jooq.jooq-codegen-gradle")
     plugin("org.flywaydb.flyway")
 
-    // For dependencies resolution.
     plugin("org.springframework.boot")
     plugin("io.spring.dependency-management")
 }
@@ -14,6 +13,9 @@ dependencies {
     implementation "org.jooq:jooq"
     implementation "org.flywaydb:flyway-core"
     implementation "org.flywaydb:flyway-database-postgresql"
+    implementation "jakarta.validation:jakarta.validation-api"
+    implementation "org.springframework:spring-context"
+    implementation "org.springframework:spring-tx"
     runtimeOnly "org.postgresql:postgresql"
     jooqCodegen "org.postgresql:postgresql"
 }
@@ -35,11 +37,25 @@ jooq {
             password = "mypassword"
         }
         generator {
+            generate {
+                pojos = true
+                validationAnnotations = true
+                daos = true
+                springAnnotations = true
+                springDao = true
+            }
             name = "org.jooq.codegen.KotlinGenerator"
             database {
                 name = "org.jooq.meta.postgres.PostgresDatabase"
                 includes = ".*"
                 inputSchema = "public"
+
+                forcedTypes {
+                    forcedType {
+                        name = "BOOLEAN"
+                        includeTypes = "(?i:SMALLINT)"
+                    }
+                }
             }
             target {
                 distsDirectory = jooqGeneratedDir

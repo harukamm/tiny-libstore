@@ -1,20 +1,21 @@
 package com.demo.project.librarystore.repository
 
-import com.demo.project.librarystore.entity.Book
+import com.demo.project.librarystore.jooq.generated.tables.daos.BookDao
+import com.demo.project.librarystore.jooq.generated.tables.pojos.Book
 import com.demo.project.librarystore.jooq.generated.tables.references.BOOK
 import com.demo.project.librarystore.jooq.generated.tables.references.BOOK_AUTHORS
 import org.jooq.DSLContext
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 
 @Repository
-class BookRepository(private val context: DSLContext) {
+class BookRepository(
+    private val context: DSLContext,
+    private val bookDao: BookDao,
+) {
     fun getBookById(id: Int): Book? {
-        return context.select()
-            .from(BOOK)
-            //.innerJoin(BOOK_AUTHORS).on(BOOK_AUTHORS.BOOK_ID.eq(BOOK.ID))
-            .where(BOOK.ID.eq(id))
-            .fetchOne()
-            ?.into(Book::class.java)
+        return bookDao.findOptionalById(id).orElse(null)
     }
 
     fun getBooksByAuthorId(authorId: Int): List<Book> {
@@ -27,16 +28,14 @@ class BookRepository(private val context: DSLContext) {
     }
 
     fun getBookByTitle(title: String): List<Book> {
-        return context.selectFrom(BOOK)
-            .where(BOOK.TITLE.eq(title))
-            .fetchInto(Book::class.java)
+        return bookDao.fetchByTitle(title)
     }
 
     fun getAllBooks(): List<Book> {
-        return context.selectFrom(BOOK)
-            .fetchInto(Book::class.java)
+        return bookDao.findAll()
     }
 
+    @Transactional
     fun createBook(
         title: String,
         price: Int,
@@ -47,7 +46,7 @@ class BookRepository(private val context: DSLContext) {
             val newId = trx.dsl().insertInto(BOOK)
                 .set(BOOK.TITLE, title)
                 .set(BOOK.PRICE, price)
-                .set(BOOK.PUBLISHED_STATUS, if (publishStatus) 1 else 0)
+                .set(BOOK.PUBLISHED_STATUS, publishStatus)
                 .returning(BOOK.ID)
                 .fetch()
                 .getValue(0, BOOK.ID)
@@ -83,7 +82,7 @@ class BookRepository(private val context: DSLContext) {
                 .let { query ->
                     title?.let { query.set(BOOK.TITLE, it) }
                     price?.let { query.set(BOOK.PRICE, it) }
-                    publishStatus?.let { query.set(BOOK.PUBLISHED_STATUS, if (it) 1 else 0) }
+                    publishStatus?.let { query.set(BOOK.PUBLISHED_STATUS, publishStatus) }
                 }
                 ?.where(BOOK.ID.eq(id))
                 ?.execute()
@@ -100,5 +99,9 @@ class BookRepository(private val context: DSLContext) {
                 .where(BOOK.ID.eq(id))
                 .execute()
         }
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(BookRepository::class.java)
     }
 }
