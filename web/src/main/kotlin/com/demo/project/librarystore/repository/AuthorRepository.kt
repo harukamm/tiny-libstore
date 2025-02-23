@@ -7,7 +7,7 @@ import org.jooq.DSLContext
 import org.springframework.stereotype.Repository
 
 @Repository
-open class AuthorRepository(private val context: DSLContext) {
+class AuthorRepository(private val context: DSLContext) {
     fun getAllAuthors(): List<Author> {
         return context.selectFrom(AUTHOR)
             .fetchInto(Author::class.java)

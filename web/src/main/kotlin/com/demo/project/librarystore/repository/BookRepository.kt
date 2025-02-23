@@ -7,7 +7,7 @@ import org.jooq.DSLContext
 import org.springframework.stereotype.Repository
 
 @Repository
-open class BookRepository(private val context: DSLContext) {
+class BookRepository(private val context: DSLContext) {
     fun getBookById(id: Int): Book? {
         return context.select()
             .from(BOOK)
