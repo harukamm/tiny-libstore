@@ -5,9 +5,8 @@ import com.demo.project.librarystore.entity.Book
 data class BookModel(
     val id: Int,
     val title: String,
-    val price: Double,
+    val price: Int,
     val publishStatus: Boolean,
-    val publishDate: String,
     val authors: List<AuthorModel>,
 )
 
@@ -17,7 +16,6 @@ fun Book.toModel(authorModels: List<AuthorModel>): BookModel {
         title = title,
         price = price,
         publishStatus = publishStatus,
-        publishDate = publishDate,
-        authors = authorModels
+        authors = authorModels,
     )
 }
