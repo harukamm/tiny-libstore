@@ -4,7 +4,5 @@ spring:
     url: jdbc:h2:mem:testdb;DB_CLOSE_ON_EXIT=TRUE;MODE=PostgreSQL;DATABASE_TO_UPPER=FALSE
     username: myuser
     password: mypassword
-    hikari:
-      auto-commit: true
   jooq:
     sql-dialect: H2
