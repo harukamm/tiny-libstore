@@ -2,7 +2,7 @@ package com.demo.project.librarystore.repository
 
 import com.demo.project.librarystore.JooqIntegrationBase
 import com.demo.project.librarystore.entity.Author
-import com.demo.project.librarystore.jooq.generated.tables.references.BOOK
+import com.demo.project.librarystore.entity.Book
 import java.time.LocalDate
 import org.assertj.core.api.Assertions.assertThat
 import org.jooq.DSLContext
@@ -21,6 +21,7 @@ class BookRepositoryTest(
         logger.debug("Inserted book with id: $id")
 
         val book = repository.getBookById(10)
+
         assertThat(book).isNotNull
         assertThat(book!!.title).isEqualTo("Test Book")
         assertThat(book.price).isEqualTo(100)
@@ -28,12 +29,13 @@ class BookRepositoryTest(
     }
 
     @Test
-    fun `getBookById returns a book with author`() {
+    fun `getBookById returns a book with a single author`() {
         val id = createBook(10, "Test Book 2", 42, false)
         val authorId = createAuthor(1, "Test Author", LocalDate.of(1991, 1, 1))
         createBookAuthor(id, authorId)
 
         val book = repository.getBookById(10)
+
         assertThat(book).isNotNull
         assertThat(book!!.title).isEqualTo("Test Book 2")
         assertThat(book.price).isEqualTo(42)
@@ -44,7 +46,7 @@ class BookRepositoryTest(
     }
 
     @Test
-    fun `get book and its authors by book id`() {
+    fun `getBookById returns a book with multiple authors`() {
         val bookIdA = createBook(1, "Test Book A", 42, false)
         val bookIdB = createBook(2, "Test Book B", 42, false)
         val authorId1 = createAuthor(1, "Test Author 1", LocalDate.of(1991, 1, 1))
@@ -55,6 +57,7 @@ class BookRepositoryTest(
         createBookAuthor(bookIdB, authorId3)
 
         val bookA = repository.getBookById(bookIdA)
+
         assertThat(bookA).isNotNull
         assertThat(bookA?.id).isEqualTo(1)
         assertThat(bookA?.authors).hasSize(2)
@@ -64,9 +67,102 @@ class BookRepositoryTest(
             Author(authorId2, "Test Author 2", LocalDate.of(1992, 2, 2)))
 
         val bookB = repository.getBookById(bookIdB)
+
         assertThat(bookB).isNotNull
         assertThat(bookB?.id).isEqualTo(2)
         assertThat(bookB?.authors).hasSize(1)
+        assertThat(bookB?.authors?.get(0)).isEqualTo(
+            Author(authorId3, "Test Author 3", LocalDate.of(1993, 3, 3)))
+    }
+
+    @Test
+    fun `getBooksByAuthorId returns books by author`() {
+        val bookId1 = createBook(1, "Test Book 1", 42, false)
+        val bookId2 = createBook(2, "Test Book 2", 42, false)
+        val authorId1 = createAuthor(1, "Test Author", LocalDate.of(1991, 1, 1))
+        val authorId2 = createAuthor(2, "Test Author 2", LocalDate.of(1992, 2, 2))
+        createBookAuthor(bookId1, authorId1)
+        createBookAuthor(bookId1, authorId2)
+        createBookAuthor(bookId2, authorId1)
+
+        val books = repository.getBooksByAuthorId(1)
+
+        assertThat(books).hasSize(2)
+        assertThat(books).contains(
+            Book(1, "Test Book 1", 42, false,
+                listOf(
+                    Author(1, "Test Author", LocalDate.of(1991, 1, 1)),
+                    Author(2, "Test Author 2", LocalDate.of(1992, 2, 2))
+                ))
+        )
+        assertThat(books).contains(
+            Book(2, "Test Book 2", 42, false, listOf(Author(1, "Test Author", LocalDate.of(1991, 1, 1))))
+        )
+    }
+
+    @Test
+    fun `createBook creates book successfully`() {
+        val authorId1 = createAuthor(1, "Test Author 1", LocalDate.of(1991, 1, 1))
+        val authorId2 = createAuthor(2, "Test Author 2", LocalDate.of(1992, 2, 2))
+
+        val bookId = repository.createBook(1, "New Book", 100, false, listOf(authorId1, authorId2))
+
+        assertThat(bookId).isEqualTo(1)
+        val book = repository.getBookById(1)
+        assertThat(book).isNotNull
+        assertThat(book!!.title).isEqualTo("New Book")
+        assertThat(book.price).isEqualTo(100)
+        assertThat(book.publishedStatus).isFalse()
+        assertThat(book.authors).hasSize(2)
+    }
+
+    @Test
+    fun `updateBook updates book successfully`() {
+        val authorId1 = createAuthor(1, "Test Author 1", LocalDate.of(1991, 1, 1))
+        val authorId2 = createAuthor(2, "Test Author 2", LocalDate.of(1992, 2, 2))
+        val bookId = createBook(1, "New Book", 100, true)
+        createBookAuthor(bookId, authorId1)
+        createBookAuthor(bookId, authorId2)
+
+        repository.updateBook(1, "Updated Book", 200, false, listOf(authorId1, authorId2))
+
+        val book = repository.getBookById(1)
+        assertThat(book).isNotNull
+        assertThat(book!!.title).isEqualTo("Updated Book")
+        assertThat(book.price).isEqualTo(200)
+        assertThat(book.publishedStatus).isFalse()
+    }
+
+    @Test
+    fun `updateBook updates book authors`() {
+        val authorId1 = createAuthor(1, "Test Author 1", LocalDate.of(1991, 1, 1))
+        val authorId2 = createAuthor(2, "Test Author 2", LocalDate.of(1992, 2, 2))
+        val authorId3 = createAuthor(3, "Test Author 3", LocalDate.of(1993, 3, 3))
+        val bookId = createBook(1, "New Book", 100, true)
+        createBookAuthor(bookId, authorId1)
+        createBookAuthor(bookId, authorId2)
+
+        repository.updateBook(1, "Updated Book", 200, false, listOf(authorId3))
+
+        val book = repository.getBookById(1)
+        assertThat(book).isNotNull
+        assertThat(book!!.title).isEqualTo("Updated Book")
+        assertThat(book.price).isEqualTo(200)
+        assertThat(book.publishedStatus).isFalse()
+    }
+
+    @Test
+    fun `deleteBookById deletes book successfully`() {
+        val authorId1 = createAuthor(1, "Test Author 1", LocalDate.of(1991, 1, 1))
+        val authorId2 = createAuthor(2, "Test Author 2", LocalDate.of(1992, 2, 2))
+        val bookId = createBook(1, "New Book", 100, true)
+        createBookAuthor(bookId, authorId1)
+        createBookAuthor(bookId, authorId2)
+
+        repository.deleteBookById(bookId)
+
+        val book = repository.getBookById(1)
+        assertThat(book).isNull()
     }
 
     companion object {

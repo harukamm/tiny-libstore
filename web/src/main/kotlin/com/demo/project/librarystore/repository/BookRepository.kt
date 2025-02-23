@@ -33,29 +33,24 @@ class BookRepository(
     }
 
     fun getBooksByAuthorId(authorId: Int): List<Book> {
-        val x = context.select(
+        return context.select(
             BOOK.ID,
             BOOK.TITLE,
             BOOK.PRICE,
             BOOK.PUBLISHED_STATUS,
             multiset(
-                context.select(BOOK_AUTHOR.AUTHOR_ID)
-                    .from(BOOK_AUTHOR)
+                context.select(AUTHOR.ID, AUTHOR.NAME, AUTHOR.BIRTH_DAY)
+                    .from(AUTHOR)
+                    .join(BOOK_AUTHOR).on(AUTHOR.ID.eq(BOOK_AUTHOR.AUTHOR_ID))
                     .where(BOOK_AUTHOR.BOOK_ID.eq(BOOK.ID))
-            ).`as`("authors")
-        ).from(BOOK)
-            .fetch()
-
-        logger.debug("Books by author: {}", x)
-
-        return listOf()
-    }
-
-    fun getBulkBooksById(ids: List<Int>): List<Book> {
-        return context.dsl().select()
-                .from(BOOK)
-                .where(BOOK.ID.`in`(ids))
-                .fetchInto(Book::class.java)
+            ).`as`("authors").convertFrom { r -> r.into(Author::class.java) })
+            .from(BOOK)
+            .where(BOOK.ID.`in`(
+                context.select(BOOK_AUTHOR.BOOK_ID)
+                    .from(BOOK_AUTHOR)
+                    .where(BOOK_AUTHOR.AUTHOR_ID.eq(authorId))
+            ))
+            .fetchInto(Book::class.java)
     }
 
     fun createBook(
@@ -71,14 +66,21 @@ class BookRepository(
                 .set(BOOK.TITLE, title)
                 .set(BOOK.PRICE, price)
                 .set(BOOK.PUBLISHED_STATUS, publishStatus)
-                .returning(BOOK.ID)
-                .fetch()
-                .getValue(0, BOOK.ID)
+                .returningResult(BOOK.ID)
+                .fetchOne()
+                ?.getValue(BOOK.ID)
 
-            trx.dsl().insertInto(BOOK_AUTHOR)
-                .columns(BOOK_AUTHOR.BOOK_ID, BOOK_AUTHOR.AUTHOR_ID)
-                .values(authorIds.map { newId to it })
-                .execute()
+            if (newId == null || newId != id) {
+                logger.error("Book not created")
+                return@transactionResult null
+            }
+
+            val queries = authorIds.map {
+                trx.dsl().insertInto(BOOK_AUTHOR)
+                    .columns(BOOK_AUTHOR.BOOK_ID, BOOK_AUTHOR.AUTHOR_ID)
+                    .values(newId, it)
+            }
+            trx.dsl().batch(queries).execute()
 
             return@transactionResult newId
         }
@@ -91,16 +93,20 @@ class BookRepository(
         publishStatus: Boolean?,
         authorIds: List<Int>?,
     ) {
+        assert(authorIds == null || authorIds.isNotEmpty()) { "AuthorIds must not be empty" }
+
         context.transaction { trx ->
             authorIds?.let {
                 trx.dsl().deleteFrom(BOOK_AUTHOR)
                     .where(BOOK_AUTHOR.BOOK_ID.eq(id))
                     .execute()
 
-                trx.dsl().insertInto(BOOK_AUTHOR)
-                    .columns(BOOK_AUTHOR.BOOK_ID, BOOK_AUTHOR.AUTHOR_ID)
-                    .values(it.map { id to it })
-                    .execute()
+               val queries = authorIds.map {
+                    trx.dsl().insertInto(BOOK_AUTHOR)
+                        .columns(BOOK_AUTHOR.BOOK_ID, BOOK_AUTHOR.AUTHOR_ID)
+                        .values(id, it)
+               }
+               trx.dsl().batch(queries).execute()
             }
             trx.dsl().update(BOOK)
                 .let { query ->
