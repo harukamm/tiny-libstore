@@ -1,6 +1,6 @@
 package com.demo.project.librarystore.model
 
-import com.demo.project.librarystore.jooq.generated.tables.pojos.Book
+import com.demo.project.librarystore.entity.Book
 
 data class BookModel(
     val id: Int,
@@ -12,10 +12,10 @@ data class BookModel(
 
 fun Book.toModel(authorModels: List<AuthorModel>): BookModel {
     return BookModel(
-        id = id!!,
-        title = title!!,
-        price = price!!,
-        publishStatus = publishedStatus ?: false,
+        id = id,
+        title = title,
+        price = price,
+        publishStatus = publishedStatus,
         authors = authorModels,
     )
 }

@@ -2,7 +2,6 @@ package com.demo.project.librarystore.repository
 
 import com.demo.project.librarystore.entity.Author
 import com.demo.project.librarystore.entity.Book
-import com.demo.project.librarystore.jooq.generated.tables.daos.BookDao
 import com.demo.project.librarystore.jooq.generated.tables.references.AUTHOR
 import com.demo.project.librarystore.jooq.generated.tables.references.BOOK
 import com.demo.project.librarystore.jooq.generated.tables.references.BOOK_AUTHOR
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Repository
 @Repository
 class BookRepository(
     private val context: DSLContext,
-    private val bookDao: BookDao,
 ) {
     fun getBookById(id: Int): Book? {
         val record = context.select(

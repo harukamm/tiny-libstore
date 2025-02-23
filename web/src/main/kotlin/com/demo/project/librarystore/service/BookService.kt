@@ -1,12 +1,6 @@
 package com.demo.project.librarystore.service
 
-import com.demo.project.librarystore.jooq.generated.tables.daos.AuthorDao
-import com.demo.project.librarystore.jooq.generated.tables.daos.BookAuthorDao
-import com.demo.project.librarystore.jooq.generated.tables.daos.BookDao
-import com.demo.project.librarystore.jooq.generated.tables.pojos.BookAuthor
-import com.demo.project.librarystore.jooq.generated.tables.records.BookAuthorRecord
 import com.demo.project.librarystore.model.BookModel
-import com.demo.project.librarystore.model.toModel
 import com.demo.project.librarystore.repository.BookRepository
 import org.apache.commons.lang3.NotImplementedException
 import org.springframework.stereotype.Service
@@ -14,8 +8,6 @@ import org.springframework.stereotype.Service
 @Service
 class BookService(
     private val bookRepository: BookRepository,
-    private val bookAuthorDao: BookAuthorDao,
-    private val authorDao: AuthorDao,
 ) {
     fun getAllBooks(): List<BookModel> {
        // return bookRepository.getAllBooks().map { it.toModel(listOf()) }
