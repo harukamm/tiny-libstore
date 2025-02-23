@@ -17,13 +17,7 @@ class BookRepositoryTest(
 
     @Test
     fun `getBookById returns a book when found`() {
-        val id = context.insertInto(BOOK)
-            .columns(BOOK.ID, BOOK.TITLE, BOOK.PRICE, BOOK.PUBLISHED_STATUS)
-            .values(10, "Test Book", 100, true)
-            .returningResult(BOOK.ID)
-            .fetchOne()
-            ?.getValue(BOOK.ID)
-
+        val id = createBook(10, "Test Book", 100, true)
         logger.debug("Inserted book with id: $id")
 
         val book = repository.getBookById(10)
@@ -34,21 +28,19 @@ class BookRepositoryTest(
     }
 
     @Test
-    fun `getBookById returns a book when found 2`() {
-        val id = context.insertInto(BOOK)
-            .columns(BOOK.ID, BOOK.TITLE, BOOK.PRICE, BOOK.PUBLISHED_STATUS)
-            .values(10, "Test Book 2", 42, false)
-            .returningResult(BOOK.ID)
-            .fetchOne()
-            ?.getValue(BOOK.ID)
-
-        logger.debug("Inserted book with id: $id")
+    fun `getBookById returns a book with author`() {
+        val id = createBook(10, "Test Book 2", 42, false)
+        val authorId = createAuthor(1, "Test Author", LocalDate.of(1991, 1, 1))
+        createBookAuthor(id, authorId)
 
         val book = repository.getBookById(10)
         assertThat(book).isNotNull
         assertThat(book!!.title).isEqualTo("Test Book 2")
         assertThat(book.price).isEqualTo(42)
         assertThat(book.publishedStatus).isFalse()
+        assertThat(book.authors).hasSize(1)
+        assertThat(book.authors[0]).isEqualTo(
+            Author(1, "Test Author", LocalDate.of(1991, 1, 1)))
     }
 
     @Test

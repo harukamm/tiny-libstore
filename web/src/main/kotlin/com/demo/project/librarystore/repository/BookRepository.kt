@@ -25,16 +25,10 @@ class BookRepository(
                     .from(AUTHOR)
                     .join(BOOK_AUTHOR).on(AUTHOR.ID.eq(BOOK_AUTHOR.AUTHOR_ID))
                     .where(BOOK_AUTHOR.BOOK_ID.eq(BOOK.ID))
-            ).`as`("authors"))
+            ).`as`("authors").convertFrom { r -> r.into(Author::class.java) })
             .from(BOOK)
             .where(BOOK.ID.eq(id))
-            .fetch {
-                val authors = it.into(AUTHOR).into(Author::class.java)
-                val book = it.into(BOOK).into(Book::class.java)
-                logger.debug("Book by id: {}", book)
-                logger.debug("Book by id: {}", authors)
-                return@fetch book
-            }
+            .fetchInto(Book::class.java)
         return record.firstOrNull()
     }
 
