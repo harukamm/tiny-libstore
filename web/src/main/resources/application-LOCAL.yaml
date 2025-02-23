@@ -4,3 +4,5 @@ spring:
     url: jdbc:postgresql://localhost:5432/libstore
     username: myuser
     password: mypassword
+    hikari:
+      auto-commit: false

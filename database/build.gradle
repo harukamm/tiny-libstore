@@ -1,6 +1,8 @@
 apply {
     plugin("org.jooq.jooq-codegen-gradle")
     plugin("org.flywaydb.flyway")
+
+    // For dependencies resolution.
     plugin("org.springframework.boot")
     plugin("io.spring.dependency-management")
 }

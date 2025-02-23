@@ -1,14 +1,14 @@
 CREATE TABLE author (
     id INT NOT NULL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    birth_date DATE NOT NULL
+    birth_day DATE NOT NULL
 );
 
 CREATE TABLE book (
     id INT NOT NULL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
-    price DECIMAL(10, 2) CHECK (price >= 0),
-    published_status VARCHAR(255) NOT NULL
+    price INT CHECK (price >= 0),
+    published_status SMALLINT DEFAULT '0'
 );
 
 CREATE TABLE book_authors (
