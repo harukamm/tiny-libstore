@@ -4,5 +4,6 @@ data class Book (
     val id: Int,
     val title: String,
     val price: Int,
-    val publishStatus: Boolean,
+    val publishedStatus: Boolean,
+    val authors: List<Author>,
 )

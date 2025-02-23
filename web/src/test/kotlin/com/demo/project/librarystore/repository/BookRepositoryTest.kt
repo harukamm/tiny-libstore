@@ -1,31 +1,19 @@
 package com.demo.project.librarystore.repository
 
+import com.demo.project.librarystore.JooqIntegrationBase
+import com.demo.project.librarystore.entity.Author
 import com.demo.project.librarystore.jooq.generated.tables.references.BOOK
-import javax.sql.DataSource
+import java.time.LocalDate
 import org.assertj.core.api.Assertions.assertThat
 import org.jooq.DSLContext
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
 
-@SpringBootTest
-@ActiveProfiles("TEST")
-class BookRepositoryTest {
-
-    @Autowired
-    private lateinit var repository: BookRepository
-
-    @Autowired
-    private lateinit var context: DSLContext
-
-    @AfterEach
-    fun tearDown() {
-        context.deleteFrom(BOOK).execute()
-    }
+class BookRepositoryTest(
+    @Autowired private val repository: BookRepository,
+    @Autowired private val context: DSLContext,
+) : JooqIntegrationBase(context) {
 
     @Test
     fun `getBookById returns a book when found`() {
@@ -61,6 +49,32 @@ class BookRepositoryTest {
         assertThat(book!!.title).isEqualTo("Test Book 2")
         assertThat(book.price).isEqualTo(42)
         assertThat(book.publishedStatus).isFalse()
+    }
+
+    @Test
+    fun `get book and its authors by book id`() {
+        val bookIdA = createBook(1, "Test Book A", 42, false)
+        val bookIdB = createBook(2, "Test Book B", 42, false)
+        val authorId1 = createAuthor(1, "Test Author 1", LocalDate.of(1991, 1, 1))
+        val authorId2 = createAuthor(2, "Test Author 2", LocalDate.of(1992, 2, 2))
+        val authorId3 = createAuthor(3, "Test Author 3", LocalDate.of(1993, 3, 3))
+        createBookAuthor(bookIdA, authorId1)
+        createBookAuthor(bookIdA, authorId2)
+        createBookAuthor(bookIdB, authorId3)
+
+        val bookA = repository.getBookById(bookIdA)
+        assertThat(bookA).isNotNull
+        assertThat(bookA?.id).isEqualTo(1)
+        assertThat(bookA?.authors).hasSize(2)
+        assertThat(bookA?.authors?.get(0)).isEqualTo(
+            Author(authorId1, "Test Author 1", LocalDate.of(1991, 1, 1)))
+        assertThat(bookA?.authors?.get(1)).isEqualTo(
+            Author(authorId2, "Test Author 2", LocalDate.of(1992, 2, 2)))
+
+        val bookB = repository.getBookById(bookIdB)
+        assertThat(bookB).isNotNull
+        assertThat(bookB?.id).isEqualTo(2)
+        assertThat(bookB?.authors).hasSize(1)
     }
 
     companion object {

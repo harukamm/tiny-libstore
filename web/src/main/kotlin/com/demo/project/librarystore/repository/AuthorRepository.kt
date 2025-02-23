@@ -27,8 +27,9 @@ class AuthorRepository(private val context: DSLContext) {
             .fetchInto(Author::class.java)
     }
 
-    fun createAuthor(name: String, birthDate: LocalDate): Int? {
+    fun createAuthor(id: Int, name: String, birthDate: LocalDate): Int? {
         return context.insertInto(AUTHOR)
+            .set(AUTHOR.ID, id)
             .set(AUTHOR.NAME, name)
             .set(AUTHOR.BIRTH_DAY, birthDate)
             .returning(AUTHOR.ID)

@@ -34,6 +34,7 @@ class LibraryStoreController(
     fun createBook(@RequestBody request: CreateBookRequest): NewIdCreatedResponse {
         return NewIdCreatedResponse(
             bookService.createBook(
+                request.id,
                 request.title,
                 request.price,
                 request.publishStatus,
@@ -73,7 +74,7 @@ class LibraryStoreController(
 
     @PostMapping("/authors")
     fun createAuthor(@RequestBody request: CreateAuthorRequest): NewIdCreatedResponse {
-        return NewIdCreatedResponse(authorService.createAuthor(request.name, request.birthDay))
+        return NewIdCreatedResponse(authorService.createAuthor(request.id, request.name, request.birthDay))
     }
 
     @PutMapping("/authors/{authorId}")

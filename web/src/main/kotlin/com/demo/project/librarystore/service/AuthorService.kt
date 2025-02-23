@@ -25,12 +25,13 @@ class AuthorService(
         return authorRepository.getAuthorByName(name).map { it.toModel() }
     }
 
-    fun createAuthor(name: String, birthDate: LocalDate): Int {
-        return authorRepository.createAuthor(name, birthDate)
+    fun createAuthor(id: Int, name: String, birthDate: LocalDate): Int {
+        return authorRepository.createAuthor(id, name, birthDate)
             ?: throw IllegalArgumentException("Author not created.")
     }
 
     fun updateAuthor(id: Int, name: String?, birthDate: LocalDate?) {
+        // TODO: check existing author
         authorRepository.updateAuthor(id, name, birthDate)
     }
 
