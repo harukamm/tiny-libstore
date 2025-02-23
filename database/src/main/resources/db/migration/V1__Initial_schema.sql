@@ -11,7 +11,7 @@ CREATE TABLE book (
     published_status SMALLINT DEFAULT '0'
 );
 
-CREATE TABLE book_authors (
+CREATE TABLE book_author (
     book_id INT NOT NULL,
     author_id INT NOT NULL,
     PRIMARY KEY (book_id, author_id),
