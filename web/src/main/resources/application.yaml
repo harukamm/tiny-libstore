@@ -3,5 +3,6 @@ spring:
     active: LOCAL
   flyway:
     baseline-on-migrate: true
+    schemas: public
   jooq:
     sql-dialect: Postgres
