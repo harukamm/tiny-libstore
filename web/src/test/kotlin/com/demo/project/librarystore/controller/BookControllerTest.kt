@@ -118,7 +118,21 @@ class BookControllerTest {
 
     @Test
     fun `create book fails with invalid parameters`() {
-        val request = CreateBookRequest(1, "", -1, true, listOf())
+        val request = CreateBookRequest(1, "", -1, true, listOf(10))
+        val res = mockMvc.perform(
+            post("/lib-store/v1.0/books")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        )
+            .andExpect(status().isBadRequest)
+            .andReturn()
+
+        logger.info("result: {}", res.response.contentAsString)
+    }
+
+    @Test
+    fun `create book fails with empty author`() {
+        val request = CreateBookRequest(1, "Foo", 1, true, listOf())
         mockMvc.perform(
             post("/lib-store/v1.0/books")
                 .contentType(MediaType.APPLICATION_JSON)

@@ -4,6 +4,7 @@ import com.demo.project.librarystore.model.AuthorModel
 import com.demo.project.librarystore.service.AuthorService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -44,7 +45,7 @@ class AuthorController(
         description = "Create a new author. Fails if the ID is already taken."
     )
     @PostMapping("/authors")
-    fun createAuthor(@RequestBody request: CreateAuthorRequest): NewIdCreatedResponse {
+    fun createAuthor(@Valid @RequestBody request: CreateAuthorRequest): NewIdCreatedResponse {
         return NewIdCreatedResponse(authorService.createAuthor(request.id, request.name, request.birthDay))
     }
 
@@ -55,7 +56,7 @@ class AuthorController(
     @PutMapping("/authors/{authorId}")
     fun updateAuthor(
         @PathVariable authorId: Int,
-        @RequestBody request: UpdateAuthorRequest
+        @Valid @RequestBody request: UpdateAuthorRequest
     ) {
         return authorService.updateAuthor(authorId, request.name, request.birthDay)
     }

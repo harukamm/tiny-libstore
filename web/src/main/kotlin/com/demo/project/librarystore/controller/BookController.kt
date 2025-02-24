@@ -36,7 +36,7 @@ class BookController(
         description = "Create a new book. Fails if the ID is already taken."
     )
     @PostMapping("/books")
-    fun createBook(@RequestBody request: CreateBookRequest): NewIdCreatedResponse {
+    fun createBook(@Valid @RequestBody request: CreateBookRequest): NewIdCreatedResponse {
         return NewIdCreatedResponse(
             bookService.createBook(
                 request.id,

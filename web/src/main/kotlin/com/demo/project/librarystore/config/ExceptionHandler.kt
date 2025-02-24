@@ -8,6 +8,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 
@@ -24,6 +25,13 @@ class ExceptionHandler {
     fun handleBadRequestException(ex: BadRequestException): ResponseEntity<Any> {
         logger.info("Bad request", ex)
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mapOf("error" to ex.message))
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    fun handleMethodArgumentNotValidException(ex: MethodArgumentNotValidException): ResponseEntity<Any> {
+        logger.info("Method argument not valid", ex)
+        val errors = ex.bindingResult.fieldErrors.map { "${it.field}: ${it.defaultMessage}" }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mapOf("error" to errors.joinToString(", ")))
     }
 
     @ExceptionHandler(DataAccessException::class)

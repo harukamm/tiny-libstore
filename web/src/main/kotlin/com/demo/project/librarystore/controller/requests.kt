@@ -14,7 +14,6 @@ data class CreateBookRequest(
     @field:Min(0)
     val price: Int,
     val publishStatus: Boolean,
-    @field:NotBlank
     @field:Size(min = 1, max = 50)
     val authorIds: List<Int>,
 )
