@@ -3,7 +3,6 @@ package com.demo.project.librarystore.controller.request
 import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.validation.constraints.AssertTrue
 import jakarta.validation.constraints.Min
-import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
 import org.springframework.format.annotation.DateTimeFormat
@@ -12,7 +11,7 @@ import java.time.LocalDate
 data class CreateBookRequest(
     @field:Min(1)
     val id: Int,
-    @field:NotBlank
+    @field:Size(min = 1, max = 200)
     val title: String,
     @field:Min(0)
     val price: Int,
@@ -23,7 +22,7 @@ data class CreateBookRequest(
 )
 
 data class UpdateBookRequest(
-    @field:NotBlank
+    @field:Size(min = 1, max = 200)
     val title: String?,
     @field:Min(0)
     val price: Int?,
@@ -35,7 +34,7 @@ data class UpdateBookRequest(
 data class CreateAuthorRequest(
     @field:Min(1)
     val id: Int,
-    @field:NotBlank
+    @field:Size(min = 1, max = 200)
     val name: String,
     @JsonFormat(pattern = "yyyy-MM-dd")
     val birthDay: LocalDate,
@@ -47,7 +46,7 @@ data class CreateAuthorRequest(
 }
 
 data class UpdateAuthorRequest(
-    @field:NotBlank
+    @field:Size(min = 1, max = 200)
     val name: String?,
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     val birthDay: LocalDate?,

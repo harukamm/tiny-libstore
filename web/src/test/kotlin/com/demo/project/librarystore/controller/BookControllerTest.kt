@@ -4,6 +4,7 @@ import com.demo.project.librarystore.JooqIntegrationBase
 import com.demo.project.librarystore.config.ExceptionHandler
 import com.demo.project.librarystore.service.AuthorService
 import com.demo.project.librarystore.service.BookService
+import org.assertj.core.api.Assertions.assertThat
 import org.jooq.DSLContext
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -92,18 +93,16 @@ class BookControllerTest(
 
     @Test
     fun `create book fails with minus price`() {
-        val res =
-            mockMvc.perform(
-                post("/lib-store/v1.0/books")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(
-                        "{\"id\":1,\"title\":\"New Book\",\"price\":-1,\"publishedStatus\":true,\"authorIds\":[1]}",
-                    ),
-            )
-                .andExpect(status().isBadRequest)
-                .andReturn()
-
-        logger.info("result: {}", res.response.contentAsString)
+        mockMvc.perform(
+            post("/lib-store/v1.0/books")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    "{\"id\":1,\"title\":\"New Book\",\"price\":-1,\"publishedStatus\":true,\"authorIds\":[1]}",
+                ),
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.error").value("price: must be greater than or equal to 0"))
+            .andReturn()
     }
 
     @Test
@@ -148,6 +147,25 @@ class BookControllerTest(
     }
 
     @Test
+    fun `should updates book authors`() {
+        authorService.createAuthor(1, "Test Author 1", LocalDate.of(1991, 1, 1))
+        authorService.createAuthor(2, "Test Author 2", LocalDate.of(1992, 2, 2))
+        bookService.createBook(1, "Title1", 100, true, listOf(1))
+
+        mockMvc.perform(
+            put("/lib-store/v1.0/books/{bookId}", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    "{\"authorIds\":[1, 2]}",
+                ),
+        )
+            .andExpect(status().isOk)
+
+        val book = bookService.getBookByIdOrThrow(1)
+        assertThat(book.authors).hasSize(2)
+    }
+
+    @Test
     fun `update book fails with empty author id`() {
         mockMvc.perform(
             put("/lib-store/v1.0/books/{bookId}", 1)
@@ -173,6 +191,37 @@ class BookControllerTest(
             .andExpect(status().isNotFound)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.error").value("Includes non-existent author."))
+    }
+
+    @Test
+    fun `update book fails with empty title`() {
+        mockMvc.perform(
+            put("/lib-store/v1.0/books/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    "{\"title\":\"\"}",
+                ),
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.error").value("title: size must be between 1 and 200"))
+    }
+
+    @Test
+    fun `update book fails if book is published and status is changed to unpublished`() {
+        authorService.createAuthor(1, "Test Author 1", LocalDate.of(1991, 1, 1))
+        bookService.createBook(1, "Title1", 100, true, listOf(1))
+
+        mockMvc.perform(
+            put("/lib-store/v1.0/books/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    "{\"publishedStatus\":false}",
+                ),
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.error").value("Book cannot be changed to unpublished status."))
     }
 
     @Test

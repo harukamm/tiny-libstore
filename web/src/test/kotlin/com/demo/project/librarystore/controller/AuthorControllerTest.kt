@@ -3,6 +3,7 @@ package com.demo.project.librarystore.controller
 import com.demo.project.librarystore.JooqIntegrationBase
 import com.demo.project.librarystore.config.ExceptionHandler
 import com.demo.project.librarystore.service.AuthorService
+import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Matchers
 import org.jooq.DSLContext
 import org.junit.jupiter.api.BeforeEach
@@ -102,6 +103,23 @@ class AuthorControllerTest(
     }
 
     @Test
+    fun `should updates author birthday`() {
+        authorService.createAuthor(1, "Test Author 1", LocalDate.of(1991, 1, 1))
+
+        mockMvc.perform(
+            put("/lib-store/v1.0/authors/{authorId}", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"birthDay\": \"1999-12-31\"}"),
+        )
+            .andExpect(status().isOk)
+
+        val author = authorService.getAuthorByIdOrThrow(1)
+        assertThat(author.id).isEqualTo(1)
+        assertThat(author.name).isEqualTo("Test Author 1")
+        assertThat(author.birthDay).isEqualTo(LocalDate.of(1999, 12, 31))
+    }
+
+    @Test
     fun `update author fails with blank title`() {
         mockMvc.perform(
             put("/lib-store/v1.0/authors/{authorId}", 1)
@@ -109,7 +127,7 @@ class AuthorControllerTest(
                 .content("{\"name\": \"\", \"birthDay\": \"1999-01-01\"}"),
         )
             .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("$.error").value("name: must not be blank"))
+            .andExpect(jsonPath("$.error").value("name: size must be between 1 and 200"))
     }
 
     companion object {
