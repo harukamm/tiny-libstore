@@ -1,5 +1,8 @@
 package com.demo.project.librarystore.controller
 
+import com.demo.project.librarystore.controller.request.CreateAuthorRequest
+import com.demo.project.librarystore.controller.request.UpdateAuthorRequest
+import com.demo.project.librarystore.controller.response.NewIdCreatedResponse
 import com.demo.project.librarystore.model.AuthorModel
 import com.demo.project.librarystore.service.AuthorService
 import io.swagger.v3.oas.annotations.Operation

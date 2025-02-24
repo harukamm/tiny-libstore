@@ -1,4 +1,4 @@
-package com.demo.project.librarystore.controller
+package com.demo.project.librarystore.controller.request
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.validation.constraints.AssertTrue
