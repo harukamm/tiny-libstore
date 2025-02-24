@@ -1,13 +1,16 @@
 package com.demo.project.librarystore.config
 
 import com.demo.project.librarystore.exception.ResourceNotFoundException
+import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import java.sql.SQLException
+import java.time.format.DateTimeParseException
 import org.apache.coyote.BadRequestException
 import org.jooq.exception.DataAccessException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -32,6 +35,24 @@ class ExceptionHandler {
         logger.info("Method argument not valid", ex)
         val errors = ex.bindingResult.fieldErrors.map { "${it.field}: ${it.defaultMessage}" }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mapOf("error" to errors.joinToString(", ")))
+    }
+
+    @ExceptionHandler(DateTimeParseException::class)
+    fun handleDateTimeParseException(ex: DateTimeParseException): ResponseEntity<Any> {
+        logger.info("Date time parse exception", ex)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mapOf("error" to "Invalid date format."))
+    }
+
+    @ExceptionHandler(MissingKotlinParameterException::class)
+    fun handleMismatchedInputException(ex: MissingKotlinParameterException): ResponseEntity<Any> {
+        logger.info("Mismatched input exception", ex)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mapOf("error" to "Missing input."))
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun handleHttpMessageConversionException(ex: HttpMessageNotReadableException): ResponseEntity<Any> {
+        logger.info("Http message conversion exception", ex)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mapOf("error" to ex.message))
     }
 
     @ExceptionHandler(DataAccessException::class)

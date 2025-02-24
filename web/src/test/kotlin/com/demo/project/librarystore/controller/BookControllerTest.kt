@@ -1,18 +1,17 @@
 package com.demo.project.librarystore.controller
 
-import com.demo.project.librarystore.exception.ResourceNotFoundException
-import com.demo.project.librarystore.model.AuthorModel
-import com.demo.project.librarystore.model.BookModel
+import com.demo.project.librarystore.JooqIntegrationBase
+import com.demo.project.librarystore.config.ExceptionHandler
+import com.demo.project.librarystore.service.AuthorService
 import com.demo.project.librarystore.service.BookService
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDate
-import org.apache.coyote.BadRequestException
+import org.jooq.DSLContext
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.lenient
-import org.mockito.Mockito.mock
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
@@ -25,32 +24,29 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 
+@SpringBootTest
 @ActiveProfiles("TEST")
-class BookControllerTest {
-    private lateinit var bookService: BookService
-
-    private lateinit var controller: BookController
+class BookControllerTest(
+    @Autowired private val controller: BookController,
+    @Autowired private val bookService: BookService,
+    @Autowired private val authorService: AuthorService,
+    @Autowired private val dslContext: DSLContext,
+) : JooqIntegrationBase(dslContext) {
 
     private lateinit var mockMvc: MockMvc
 
-    private val objectMapper = jacksonObjectMapper()
-
     @BeforeEach
     fun setup() {
-        bookService = mock(BookService::class.java)
-        controller = BookController(bookService)
-
-        mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
+        mockMvc = MockMvcBuilders.standaloneSetup(controller)
+            .setControllerAdvice(ExceptionHandler())
+            .build()
     }
 
     @Test
-    fun `should return all books`() {
-        val author1 = AuthorModel(5, "Test Author 1", LocalDate.of(1991, 1, 1))
-        val author2 = AuthorModel(10, "Test Author 2", LocalDate.of(1992, 2, 2))
-        val book = BookModel(1, "Title1", 100, true, listOf(author1, author2))
-        lenient().doReturn(book)
-            .`when`(bookService)
-            .getBookByIdOrThrow(1)
+    fun `should return a book`() {
+        authorService.createAuthor(5, "Test Author 1", LocalDate.of(1991, 1, 1))
+        authorService.createAuthor(10, "Test Author 2", LocalDate.of(1992, 2, 2))
+        bookService.createBook(1, "Title1", 100, true, listOf(5, 10))
 
         mockMvc.perform(
             get("/lib-store/v1.0/books/1")
@@ -64,17 +60,13 @@ class BookControllerTest {
             .andExpect(jsonPath("$.publishedStatus").value(true))
             .andExpect(jsonPath("$.authors.length()").value(2))
             .andExpect(jsonPath("$.authors[0].name").value("Test Author 1"))
-            .andExpect(jsonPath("$.authors[0].birthDay").value("Test Author 2"))
-            .andExpect(jsonPath("$.authors[1].name").value("Test Author 1"))
-            .andExpect(jsonPath("$.authors[1].birthDay").value("Test Author 2"))
+            .andExpect(jsonPath("$.authors[0].birthDay").value("1991-01-01"))
+            .andExpect(jsonPath("$.authors[1].name").value("Test Author 2"))
+            .andExpect(jsonPath("$.authors[1].birthDay").value("1992-02-02"))
     }
 
     @Test
     fun `book by id fails if book does not exist`() {
-        lenient().doThrow(ResourceNotFoundException::class.java)
-            .`when`(bookService)
-            .getBookByIdOrThrow(1)
-
         mockMvc.perform(
             get("/lib-store/v1.0/books/1")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -84,45 +76,26 @@ class BookControllerTest {
 
     @Test
     fun `should create a book and return new ID`() {
-        val request = CreateBookRequest(1, "New Book", 150, true, listOf(1))
-        val response = NewIdCreatedResponse(1)
-        lenient().doReturn(1)
-            .`when`(bookService)
-            .createBook(1, "New Book", 150, true, listOf(1))
+        authorService.createAuthor(1, "Test Author", LocalDate.of(1991, 1, 1))
 
         mockMvc.perform(
             post("/lib-store/v1.0/books")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(
+                    "{\"id\":1,\"title\":\"New Book\",\"price\":150,\"publishStatus\":true,\"authorIds\":[1]}")
         )
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.id").value(response.id))
+            .andExpect(jsonPath("$.id").value(1))
     }
 
     @Test
-    fun `create book fails with bad request`() {
-        val request = CreateBookRequest(1, "New Book", 150, true, listOf(1))
-        lenient().doThrow(BadRequestException::class.java)
-            .`when`(bookService)
-            .createBook(1, "New Book", 150, true, listOf(1))
-
-        mockMvc.perform(
-            post("/lib-store/v1.0/books")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-        )
-            .andExpect(status().isBadRequest)
-            .andReturn()
-    }
-
-    @Test
-    fun `create book fails with invalid parameters`() {
-        val request = CreateBookRequest(1, "", -1, true, listOf(10))
+    fun `create book fails with minus price`() {
         val res = mockMvc.perform(
             post("/lib-store/v1.0/books")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(
+                    "{\"id\":1,\"title\":\"New Book\",\"price\":-1,\"publishStatus\":true,\"authorIds\":[1]}")
         )
             .andExpect(status().isBadRequest)
             .andReturn()
@@ -132,36 +105,55 @@ class BookControllerTest {
 
     @Test
     fun `create book fails with empty author`() {
-        val request = CreateBookRequest(1, "Foo", 1, true, listOf())
         mockMvc.perform(
             post("/lib-store/v1.0/books")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(
+                    "{\"id\":1,\"title\":\"New Book\",\"price\":-1,\"publishStatus\":true,\"authorIds\":[]}")
         )
             .andExpect(status().isBadRequest)
             .andReturn()
     }
 
     @Test
-    fun `update book fails with invalid parameters`() {
-        val request = UpdateBookRequest("", -1, true, listOf())
+    fun `create book fails with unknown author id`() {
+        mockMvc.perform(
+            post("/lib-store/v1.0/books")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    "{\"id\":1,\"title\":\"New Book\",\"price\":150,\"publishStatus\":true,\"authorIds\":[99]}")
+        )
+            .andExpect(status().isNotFound)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.id").value(1))
+    }
+
+    @Test
+    fun `update book fails with empty author id`() {
         mockMvc.perform(
             put("/lib-store/v1.0/books/{bookId}", 1)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
+                .content(
+                    "{\"id\":1,\"title\":\"x\",\"price\":1,\"publishStatus\":true,\"authorIds\":[]}")
         )
             .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.error").value("authorIds: size must be between 1 and 50"))
             .andReturn()
     }
 
     @Test
     fun `should delete book by ID`() {
-        lenient().doThrow(ResourceNotFoundException::class.java)
-            .`when`(bookService)
-            .deleteBookById(1)
+        authorService.createAuthor(1, "Test Author", LocalDate.of(1991, 1, 1))
+        bookService.createBook(1, "Title1", 100, true, listOf(1))
 
         mockMvc.perform(
             delete("/lib-store/v1.0/books/{bookId}", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+
+        mockMvc.perform(
+            get("/lib-store/v1.0/books/{bookId}", 1)
                 .contentType(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isNotFound)

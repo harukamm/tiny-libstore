@@ -1,53 +1,48 @@
 package com.demo.project.librarystore.controller
 
-import com.demo.project.librarystore.exception.ResourceNotFoundException
-import com.demo.project.librarystore.model.AuthorModel
-import com.demo.project.librarystore.model.BookModel
+import com.demo.project.librarystore.JooqIntegrationBase
+import com.demo.project.librarystore.config.ExceptionHandler
 import com.demo.project.librarystore.service.AuthorService
-import com.demo.project.librarystore.service.BookService
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDate
-import org.apache.coyote.BadRequestException
+import org.hamcrest.Matchers
+import org.jooq.DSLContext
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.lenient
-import org.mockito.Mockito.mock
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 
+@SpringBootTest
 @ActiveProfiles("TEST")
-class AuthorControllerTest {
-    private lateinit var authorService: AuthorService
-
-    private lateinit var controller: AuthorController
+class AuthorControllerTest(
+    @Autowired private val controller: AuthorController,
+    @Autowired private val authorService: AuthorService,
+    @Autowired private val dslContext: DSLContext,
+) : JooqIntegrationBase(dslContext) {
 
     private lateinit var mockMvc: MockMvc
 
     @BeforeEach
     fun setup() {
-        authorService = mock(AuthorService::class.java)
-        controller = AuthorController(authorService)
-
-        mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
+        mockMvc = MockMvcBuilders.standaloneSetup(controller)
+            .setControllerAdvice(ExceptionHandler())
+            .build()
     }
 
     @Test
     fun `should return author`() {
-        val author = AuthorModel(1, "Test Author 1", LocalDate.of(1991, 1, 1))
-        lenient().doReturn(author)
-            .`when`(authorService)
-            .getAuthorByIdOrThrow(1)
+        authorService.createAuthor(1, "Test Author 1", LocalDate.of(1991, 1, 1))
 
         mockMvc.perform(
             get("/lib-store/v1.0/authors/1")
@@ -62,11 +57,6 @@ class AuthorControllerTest {
 
     @Test
     fun `should create a author and return new ID`() {
-        val response = NewIdCreatedResponse(1)
-        lenient().doReturn(1)
-            .`when`(authorService)
-            .createAuthor(1, "Test Author", LocalDate.of(1991, 1, 1))
-
         mockMvc.perform(
             post("/lib-store/v1.0/authors")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -74,29 +64,51 @@ class AuthorControllerTest {
         )
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.id").value(response.id))
+            .andExpect(jsonPath("$.id").value(123))
     }
 
     @Test
-    fun `create book fails with invalid parameters`() {
+    fun `create author fails with missing parameters`() {
+        mockMvc.perform(
+            post("/lib-store/v1.0/authors")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"id\": 123}")
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.error", Matchers.containsString("JSON property name due to missing")))
+    }
+
+    @Test
+    fun `create author fails with invalid parameters`() {
         mockMvc.perform(
             post("/lib-store/v1.0/authors")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"id\": 123, \"name\": \"\", \"birthDay\": \"1991\"}")
         )
             .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("$.error").value("foo"))
+            .andExpect(jsonPath("$.error", Matchers.containsString("Text '1991' could not be parsed")))
     }
 
     @Test
-    fun `update book fails with invalid parameters`() {
+    fun `create author fails with future date`() {
         mockMvc.perform(
-            post("/lib-store/v1.0/authors/{authorId}", 1)
+            post("/lib-store/v1.0/authors")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"name\": \"abc\", \"birthDay\": \"abc\"}")
+                .content("{\"id\": 123, \"name\": \"Test Author\", \"birthDay\": \"2991-01-01\"}")
         )
             .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("$.error").value("foo"))
+            .andExpect(jsonPath("$.error").value("pastDate: Only past dates are allowed."))
+    }
+
+    @Test
+    fun `update author fails with blank title`() {
+        mockMvc.perform(
+            put("/lib-store/v1.0/authors/{authorId}", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\": \"\", \"birthDay\": \"1999-01-01\"}")
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.error").value("name: must not be blank"))
     }
 
     companion object {
