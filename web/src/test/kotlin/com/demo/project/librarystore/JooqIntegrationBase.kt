@@ -45,4 +45,13 @@ abstract class JooqIntegrationBase(private val context: DSLContext) {
             .values(bookId, authorId)
             .execute()
     }
+
+    protected fun getBookAuthorsRecordCount(bookId: Int): Int {
+        return context.select(
+            BOOK_AUTHOR.BOOK_ID,
+            BOOK_AUTHOR.AUTHOR_ID
+        )
+            .from(BOOK_AUTHOR)
+            .count()
+    }
 }

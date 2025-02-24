@@ -1,6 +1,5 @@
 package com.demo.project.librarystore.service
 
-import com.demo.project.librarystore.entity.Author
 import com.demo.project.librarystore.model.AuthorModel
 import com.demo.project.librarystore.model.toModel
 import com.demo.project.librarystore.repository.AuthorRepository
@@ -16,7 +15,7 @@ class AuthorService(
         return authorRepository.getAllAuthors().map { it.toModel() }
     }
 
-    fun getAuthorById(id: Int): AuthorModel {
+    fun getAuthorByIdOrThrow(id: Int): AuthorModel {
         return authorRepository.getAuthorById(id)?.toModel()
             ?: throw IllegalArgumentException("Author not found.")
     }
@@ -26,17 +25,20 @@ class AuthorService(
     }
 
     fun createAuthor(id: Int, name: String, birthDate: LocalDate): Int {
+        authorRepository.getAuthorById(id)?.let {
+            throw IllegalArgumentException("Author id already used.")
+        }
         return authorRepository.createAuthor(id, name, birthDate)
             ?: throw IllegalArgumentException("Author not created.")
     }
 
     fun updateAuthor(id: Int, name: String?, birthDate: LocalDate?) {
-        // TODO: check existing author
+        getAuthorByIdOrThrow(id)
         authorRepository.updateAuthor(id, name, birthDate)
     }
 
     fun deleteAuthorById(id: Int) {
-        // TODO: Safely delete author relationship with books
+        getAuthorByIdOrThrow(id)
         authorRepository.deleteAuthor(id)
     }
 }

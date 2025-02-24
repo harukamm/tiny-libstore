@@ -6,16 +6,16 @@ data class BookModel(
     val id: Int,
     val title: String,
     val price: Int,
-    val publishStatus: Boolean,
+    val publishedStatus: Boolean,
     val authors: List<AuthorModel>,
 )
 
-fun Book.toModel(authorModels: List<AuthorModel>): BookModel {
+fun Book.toModel(): BookModel {
     return BookModel(
         id = id,
         title = title,
         price = price,
-        publishStatus = publishedStatus,
-        authors = authorModels,
+        publishedStatus = publishedStatus,
+        authors = authors.map { it.toModel() },
     )
 }

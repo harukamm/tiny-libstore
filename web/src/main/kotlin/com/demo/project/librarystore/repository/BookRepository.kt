@@ -10,6 +10,8 @@ import org.jooq.impl.DSL.multiset
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Repository
 
+
+@SuppressWarnings("Duplicates")
 @Repository
 class BookRepository(
     private val context: DSLContext,
@@ -93,8 +95,6 @@ class BookRepository(
         publishStatus: Boolean?,
         authorIds: List<Int>?,
     ) {
-        assert(authorIds == null || authorIds.isNotEmpty()) { "AuthorIds must not be empty" }
-
         context.transaction { trx ->
             authorIds?.let {
                 trx.dsl().deleteFrom(BOOK_AUTHOR)
@@ -108,27 +108,26 @@ class BookRepository(
                }
                trx.dsl().batch(queries).execute()
             }
-            trx.dsl().update(BOOK)
-                .let { query ->
-                    title?.let { query.set(BOOK.TITLE, it) }
-                    price?.let { query.set(BOOK.PRICE, it) }
-                    publishStatus?.let { query.set(BOOK.PUBLISHED_STATUS, publishStatus) }
-                }
-                ?.where(BOOK.ID.eq(id))
-                ?.execute()
+
+            val updateMap = mutableMapOf<Any, Any>()
+            title?.let { updateMap[BOOK.TITLE] = it }
+            price?.let { updateMap[BOOK.PRICE] = it }
+            publishStatus?.let { updateMap[BOOK.PUBLISHED_STATUS] = it }
+
+            if (updateMap.isNotEmpty()) {
+                trx.dsl().update(BOOK)
+                    .set(updateMap)
+                    .where(BOOK.ID.eq(id))
+                    .execute()
+            }
         }
     }
 
     fun deleteBookById(id: Int) {
-        context.transaction { trx ->
-            trx.dsl().deleteFrom(BOOK_AUTHOR)
-                .where(BOOK_AUTHOR.BOOK_ID.eq(id))
-                .execute()
-
-            trx.dsl().deleteFrom(BOOK)
-                .where(BOOK.ID.eq(id))
-                .execute()
-        }
+        // book-author entities are deleted by ON DELETE CASCADE
+        context.deleteFrom(BOOK)
+            .where(BOOK.ID.eq(id))
+            .execute()
     }
 
     companion object {

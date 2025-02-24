@@ -38,16 +38,21 @@ class AuthorRepository(private val context: DSLContext) {
     }
 
     fun updateAuthor(id: Int, name: String?, birthDate: LocalDate?) {
-        context.update(AUTHOR)
-            .let { query ->
-                name?.let { query.set(AUTHOR.NAME, it) }
-                birthDate?.let { query.set(AUTHOR.BIRTH_DAY, it) }
-            }
-            ?.where(AUTHOR.ID.eq(id))
-            ?.execute()
+        val updateMap = mutableMapOf<Any, Any>()
+
+        name?.let { updateMap[AUTHOR.NAME] = it }
+        birthDate?.let { updateMap[AUTHOR.BIRTH_DAY] = it }
+
+        if (updateMap.isNotEmpty()) {
+            context.update(AUTHOR)
+                .set(updateMap)
+                .where(AUTHOR.ID.eq(id))
+                .execute()
+        }
     }
 
     fun deleteAuthor(id: Int) {
+        // book-author entities are deleted by ON DELETE CASCADE
         context.deleteFrom(AUTHOR)
             .where(AUTHOR.ID.eq(id))
             .execute()

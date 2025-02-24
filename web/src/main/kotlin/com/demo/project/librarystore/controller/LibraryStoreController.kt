@@ -27,7 +27,7 @@ class LibraryStoreController(
 
     @GetMapping("/books/{bookId}")
     fun getBookById(@PathVariable bookId: Int): BookModel {
-        return bookService.getBookById(bookId)
+        return bookService.getBookByIdOrThrow(bookId)
     }
 
     @PostMapping("/books")
@@ -69,7 +69,7 @@ class LibraryStoreController(
 
     @GetMapping("/authors/{authorId}")
     fun getAuthorById(@PathVariable authorId: Int): AuthorModel {
-        return authorService.getAuthorById(authorId)
+        return authorService.getAuthorByIdOrThrow(authorId)
     }
 
     @PostMapping("/authors")

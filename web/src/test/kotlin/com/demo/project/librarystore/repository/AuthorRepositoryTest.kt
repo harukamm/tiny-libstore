@@ -3,6 +3,7 @@ package com.demo.project.librarystore.repository
 import com.demo.project.librarystore.JooqIntegrationBase
 import com.demo.project.librarystore.entity.Author
 import java.time.LocalDate
+import org.assertj.core.api.Assertions.`as`
 import org.assertj.core.api.Assertions.assertThat
 import org.jooq.DSLContext
 import org.junit.jupiter.api.Test
@@ -105,5 +106,21 @@ class AuthorRepositoryTest(
         repository.deleteAuthor(authorId)
         val deletedAuthor = repository.getAuthorById(authorId)
         assertThat(deletedAuthor).isNull()
+    }
+
+    @Test
+    fun `deleteAuthor deletes author, book-author relations as well`() {
+        val authorIdToDelete = createAuthor(1, "Author to Delete", LocalDate.of(1970, 1, 1))
+        val authorId = createAuthor(2, "Author", LocalDate.of(1972, 2, 2))
+        val bookId = createBook(1, "Book with Author", 100, true)
+        createBookAuthor(bookId, authorId)
+        createBookAuthor(bookId, authorIdToDelete)
+
+        repository.deleteAuthor(authorIdToDelete)
+
+        assertThat(repository.getAuthorById(authorIdToDelete)).isNull()
+        assertThat(repository.getAuthorById(authorId)).isNotNull
+        val authorsCountOfBook = getBookAuthorsRecordCount(bookId)
+        assertThat(authorsCountOfBook).isEqualTo(1)
     }
 }
