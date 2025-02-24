@@ -63,6 +63,6 @@ class BookService(
     }
 
     fun getBooksByAuthorId(authorId: Int): List<BookModel> {
-        throw NotImplementedException("tobe")
+        return bookRepository.getBooksByAuthorId(authorId).map { it.toModel() }
     }
 }
