@@ -67,7 +67,7 @@ class BookRepository(
                 .set(BOOK.ID, id)
                 .set(BOOK.TITLE, title)
                 .set(BOOK.PRICE, price)
-                .set(BOOK.PUBLISHED_STATUS, publishStatus)
+                .set(BOOK.PUBLISHED_STATUS, if (publishStatus) 1 else 0)
                 .returningResult(BOOK.ID)
                 .fetchOne()
                 ?.getValue(BOOK.ID)
@@ -112,7 +112,7 @@ class BookRepository(
             val updateMap = mutableMapOf<Any, Any>()
             title?.let { updateMap[BOOK.TITLE] = it }
             price?.let { updateMap[BOOK.PRICE] = it }
-            publishStatus?.let { updateMap[BOOK.PUBLISHED_STATUS] = it }
+            publishStatus?.let { updateMap[BOOK.PUBLISHED_STATUS] = if (it) 1 else 0 }
 
             if (updateMap.isNotEmpty()) {
                 trx.dsl().update(BOOK)

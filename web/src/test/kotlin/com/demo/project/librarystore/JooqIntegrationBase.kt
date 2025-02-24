@@ -33,7 +33,7 @@ abstract class JooqIntegrationBase(private val context: DSLContext) {
     protected fun createBook(id: Int, title: String, price: Int, publishStatus: Boolean): Int {
         return context.insertInto(BOOK)
             .columns(BOOK.ID, BOOK.TITLE, BOOK.PRICE, BOOK.PUBLISHED_STATUS)
-            .values(id, title, price, publishStatus)
+            .values(id, title, price, if (publishStatus) 1 else 0)
             .returningResult(BOOK.ID)
             .fetchOne()
             ?.getValue(BOOK.ID)

@@ -39,13 +39,6 @@ jooq {
                 name = "org.jooq.meta.postgres.PostgresDatabase"
                 includes = ".*"
                 inputSchema = "public"
-
-                forcedTypes {
-                    forcedType {
-                        name = "BOOLEAN"
-                        includeTypes = "(?i:SMALLINT)"
-                    }
-                }
             }
             target {
                 distsDirectory = jooqGeneratedDir
