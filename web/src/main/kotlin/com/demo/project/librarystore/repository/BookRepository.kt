@@ -6,6 +6,7 @@ import com.demo.project.librarystore.jooq.generated.tables.references.AUTHOR
 import com.demo.project.librarystore.jooq.generated.tables.references.BOOK
 import com.demo.project.librarystore.jooq.generated.tables.references.BOOK_AUTHOR
 import org.jooq.DSLContext
+import org.jooq.SelectJoinStep
 import org.jooq.impl.DSL.multiset
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Repository
@@ -16,38 +17,14 @@ class BookRepository(
 ) {
     fun getBookById(id: Int): Book? {
         val record =
-            context.select(
-                BOOK.ID,
-                BOOK.TITLE,
-                BOOK.PRICE,
-                BOOK.PUBLISHED_STATUS,
-                multiset(
-                    context.select(AUTHOR.ID, AUTHOR.NAME, AUTHOR.BIRTH_DAY)
-                        .from(AUTHOR)
-                        .join(BOOK_AUTHOR).on(AUTHOR.ID.eq(BOOK_AUTHOR.AUTHOR_ID))
-                        .where(BOOK_AUTHOR.BOOK_ID.eq(BOOK.ID)),
-                ).`as`("authors").convertFrom { r -> r.into(Author::class.java) },
-            )
-                .from(BOOK)
+            selectBooksWithAuthors(context)
                 .where(BOOK.ID.eq(id))
                 .fetchInto(Book::class.java)
         return record.firstOrNull()
     }
 
     fun getBooksByAuthorId(authorId: Int): List<Book> {
-        return context.select(
-            BOOK.ID,
-            BOOK.TITLE,
-            BOOK.PRICE,
-            BOOK.PUBLISHED_STATUS,
-            multiset(
-                context.select(AUTHOR.ID, AUTHOR.NAME, AUTHOR.BIRTH_DAY)
-                    .from(AUTHOR)
-                    .join(BOOK_AUTHOR).on(AUTHOR.ID.eq(BOOK_AUTHOR.AUTHOR_ID))
-                    .where(BOOK_AUTHOR.BOOK_ID.eq(BOOK.ID)),
-            ).`as`("authors").convertFrom { r -> r.into(Author::class.java) },
-        )
-            .from(BOOK)
+        return selectBooksWithAuthors(context)
             .where(
                 BOOK.ID.`in`(
                     context.select(BOOK_AUTHOR.BOOK_ID)
@@ -56,6 +33,22 @@ class BookRepository(
                 ),
             )
             .fetchInto(Book::class.java)
+    }
+
+    private fun selectBooksWithAuthors(ctx: DSLContext): SelectJoinStep<*> {
+        return ctx.select(
+            BOOK.ID,
+            BOOK.TITLE,
+            BOOK.PRICE,
+            BOOK.PUBLISHED_STATUS,
+            multiset(
+                ctx.select(AUTHOR.ID, AUTHOR.NAME, AUTHOR.BIRTH_DAY)
+                    .from(AUTHOR)
+                    .join(BOOK_AUTHOR).on(AUTHOR.ID.eq(BOOK_AUTHOR.AUTHOR_ID))
+                    .where(BOOK_AUTHOR.BOOK_ID.eq(BOOK.ID)),
+            ).`as`("authors").convertFrom { r -> r.into(Author::class.java) },
+        )
+            .from(BOOK)
     }
 
     fun createBook(

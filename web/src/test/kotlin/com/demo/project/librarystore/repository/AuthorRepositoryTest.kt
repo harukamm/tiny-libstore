@@ -14,7 +14,7 @@ class AuthorRepositoryTest(
 ) : JooqIntegrationBase(context) {
     @Test
     fun `getAuthorById returns an author when found`() {
-        val id = createAuthor(1, "Test Author", LocalDate.of(1991, 1, 1))
+        createAuthor(1, "Test Author", LocalDate.of(1991, 1, 1))
         val author = repository.getAuthorById(1)
         assertThat(author).isNotNull
         assertThat(author!!.id).isEqualTo(1)

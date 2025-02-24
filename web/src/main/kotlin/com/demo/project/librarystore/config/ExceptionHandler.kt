@@ -2,7 +2,6 @@ package com.demo.project.librarystore.config
 
 import com.demo.project.librarystore.exception.ResourceNotFoundException
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
-import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import org.apache.coyote.BadRequestException
 import org.jooq.exception.DataAccessException
 import org.slf4j.Logger

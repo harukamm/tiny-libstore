@@ -41,7 +41,7 @@ jooq {
                 inputSchema = "public"
             }
             target {
-                distsDirectory = jooqGeneratedDir
+                directory = file(jooqGeneratedDir)
                 packageName = jooqGeneratedPackageName
             }
         }
