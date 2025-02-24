@@ -16,7 +16,7 @@ data class CreateBookRequest(
     val title: String,
     @field:Min(0)
     val price: Int,
-    val publishStatus: Boolean,
+    val publishedStatus: Boolean,
     @field:NotNull
     @field:Size(min = 1, max = 50)
     val authorIds: List<Int>,
@@ -27,7 +27,7 @@ data class UpdateBookRequest(
     val title: String?,
     @field:Min(0)
     val price: Int?,
-    val publishStatus: Boolean?,
+    val publishedStatus: Boolean?,
     @field:Size(min = 1, max = 50)
     val authorIds: List<Int>?,
 )

@@ -62,7 +62,7 @@ class BookRepository(
         id: Int,
         title: String,
         price: Int,
-        publishStatus: Boolean,
+        publishedStatus: Boolean,
         authorIds: List<Int>,
     ): Int? {
         return context.transactionResult { trx ->
@@ -71,7 +71,7 @@ class BookRepository(
                     .set(BOOK.ID, id)
                     .set(BOOK.TITLE, title)
                     .set(BOOK.PRICE, price)
-                    .set(BOOK.PUBLISHED_STATUS, if (publishStatus) 1 else 0)
+                    .set(BOOK.PUBLISHED_STATUS, if (publishedStatus) 1 else 0)
                     .returningResult(BOOK.ID)
                     .fetchOne()
                     ?.getValue(BOOK.ID)
@@ -97,7 +97,7 @@ class BookRepository(
         id: Int,
         title: String?,
         price: Int?,
-        publishStatus: Boolean?,
+        publishedStatus: Boolean?,
         authorIds: List<Int>?,
     ) {
         context.transaction { trx ->
@@ -118,7 +118,7 @@ class BookRepository(
             val updateMap = mutableMapOf<Any, Any>()
             title?.let { updateMap[BOOK.TITLE] = it }
             price?.let { updateMap[BOOK.PRICE] = it }
-            publishStatus?.let { updateMap[BOOK.PUBLISHED_STATUS] = if (it) 1 else 0 }
+            publishedStatus?.let { updateMap[BOOK.PUBLISHED_STATUS] = if (it) 1 else 0 }
 
             if (updateMap.isNotEmpty()) {
                 trx.dsl().update(BOOK)

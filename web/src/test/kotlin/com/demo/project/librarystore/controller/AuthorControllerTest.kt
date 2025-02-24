@@ -90,11 +90,12 @@ class AuthorControllerTest(
     }
 
     @Test
-    fun `create author fails with future date`() {
+    fun `create author fails if set birth day today`() {
+        val today = LocalDate.now()
         mockMvc.perform(
             post("/lib-store/v1.0/authors")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"id\": 123, \"name\": \"Test Author\", \"birthDay\": \"2991-01-01\"}"),
+                .content("{\"id\": 123, \"name\": \"Test Author\", \"birthDay\": \"${today}\"}"),
         )
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("$.error").value("pastDate: Only past dates are allowed."))

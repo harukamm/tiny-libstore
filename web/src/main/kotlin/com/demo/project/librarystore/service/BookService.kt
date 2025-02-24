@@ -25,7 +25,7 @@ class BookService(
         id: Int,
         title: String,
         price: Int,
-        publishStatus: Boolean,
+        publishedStatus: Boolean,
         authorIds: List<Int>,
     ): Int {
         val exist: Book? = bookRepository.getBookById(id)
@@ -33,7 +33,7 @@ class BookService(
             throw BadRequestException("Book id already used.")
         }
         validateBookAuthorIds(authorIds, false)
-        return bookRepository.createBook(id, title, price, publishStatus, authorIds)
+        return bookRepository.createBook(id, title, price, publishedStatus, authorIds)
             ?: throw RuntimeException("Book not created")
     }
 
@@ -41,16 +41,16 @@ class BookService(
         id: Int,
         title: String?,
         price: Int?,
-        publishStatus: Boolean?,
+        publishedStatus: Boolean?,
         authorIds: List<Int>?,
     ) {
         validateBookAuthorIds(authorIds, true)
         val exist = getBookByIdOrThrow(id)
-        if (exist.publishedStatus && publishStatus == false) {
+        if (exist.publishedStatus && publishedStatus == false) {
             throw BadRequestException("Book cannot be changed to unpublished status.")
         }
 
-        bookRepository.updateBook(id, title, price, publishStatus, authorIds)
+        bookRepository.updateBook(id, title, price, publishedStatus, authorIds)
     }
 
     fun deleteBookById(id: Int) {

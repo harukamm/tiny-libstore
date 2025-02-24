@@ -82,7 +82,7 @@ class BookControllerTest(
             post("/lib-store/v1.0/books")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
-                    "{\"id\":1,\"title\":\"New Book\",\"price\":150,\"publishStatus\":true,\"authorIds\":[1]}",
+                    "{\"id\":1,\"title\":\"New Book\",\"price\":150,\"publishedStatus\":true,\"authorIds\":[1]}",
                 ),
         )
             .andExpect(status().isOk)
@@ -97,7 +97,7 @@ class BookControllerTest(
                 post("/lib-store/v1.0/books")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
-                        "{\"id\":1,\"title\":\"New Book\",\"price\":-1,\"publishStatus\":true,\"authorIds\":[1]}",
+                        "{\"id\":1,\"title\":\"New Book\",\"price\":-1,\"publishedStatus\":true,\"authorIds\":[1]}",
                     ),
             )
                 .andExpect(status().isBadRequest)
@@ -112,7 +112,7 @@ class BookControllerTest(
             post("/lib-store/v1.0/books")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
-                    "{\"id\":1,\"title\":\"New Book\",\"price\":-1,\"publishStatus\":true,\"authorIds\":[]}",
+                    "{\"id\":1,\"title\":\"New Book\",\"price\":-1,\"publishedStatus\":true,\"authorIds\":[]}",
                 ),
         )
             .andExpect(status().isBadRequest)
@@ -125,7 +125,7 @@ class BookControllerTest(
             post("/lib-store/v1.0/books")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
-                    "{\"id\":1,\"title\":\"New Book\",\"price\":150,\"publishStatus\":true,\"authorIds\":[99]}",
+                    "{\"id\":1,\"title\":\"New Book\",\"price\":150,\"publishedStatus\":true,\"authorIds\":[99]}",
                 ),
         )
             .andExpect(status().isNotFound)
@@ -139,7 +139,7 @@ class BookControllerTest(
             put("/lib-store/v1.0/books/{bookId}", 1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
-                    "{\"id\":1,\"title\":\"x\",\"price\":1,\"publishStatus\":true,\"authorIds\":[]}",
+                    "{\"id\":1,\"title\":\"x\",\"price\":1,\"publishedStatus\":true,\"authorIds\":[]}",
                 ),
         )
             .andExpect(status().isBadRequest)
@@ -153,7 +153,7 @@ class BookControllerTest(
             put("/lib-store/v1.0/books/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
-                    "{\"title\":\"New Book\",\"price\":150,\"publishStatus\":true,\"authorIds\":[99]}",
+                    "{\"title\":\"New Book\",\"price\":150,\"publishedStatus\":true,\"authorIds\":[99]}",
                 ),
         )
             .andExpect(status().isNotFound)

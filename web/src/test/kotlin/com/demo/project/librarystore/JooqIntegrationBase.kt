@@ -38,11 +38,11 @@ abstract class JooqIntegrationBase(private val context: DSLContext) {
         id: Int,
         title: String,
         price: Int,
-        publishStatus: Boolean,
+        publishedStatus: Boolean,
     ): Int {
         return context.insertInto(BOOK)
             .columns(BOOK.ID, BOOK.TITLE, BOOK.PRICE, BOOK.PUBLISHED_STATUS)
-            .values(id, title, price, if (publishStatus) 1 else 0)
+            .values(id, title, price, if (publishedStatus) 1 else 0)
             .returningResult(BOOK.ID)
             .fetchOne()
             ?.getValue(BOOK.ID)

@@ -49,7 +49,7 @@ class BookController(
                 request.id,
                 request.title,
                 request.price,
-                request.publishStatus,
+                request.publishedStatus,
                 request.authorIds,
             ),
         )
@@ -68,7 +68,7 @@ class BookController(
             bookId,
             request.title,
             request.price,
-            request.publishStatus,
+            request.publishedStatus,
             request.authorIds,
         )
     }
