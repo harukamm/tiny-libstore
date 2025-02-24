@@ -125,7 +125,7 @@ class BookControllerTest(
         )
             .andExpect(status().isNotFound)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.id").value(1))
+            .andExpect(jsonPath("$.error").value("Includes non-existent author."))
     }
 
     @Test
@@ -139,6 +139,19 @@ class BookControllerTest(
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("$.error").value("authorIds: size must be between 1 and 50"))
             .andReturn()
+    }
+
+    @Test
+    fun `update book fails with unknown author id`() {
+        mockMvc.perform(
+            put("/lib-store/v1.0/books/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    "{\"title\":\"New Book\",\"price\":150,\"publishStatus\":true,\"authorIds\":[99]}")
+        )
+            .andExpect(status().isNotFound)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.error").value("Includes non-existent author."))
     }
 
     @Test

@@ -4,6 +4,7 @@ import com.demo.project.librarystore.entity.Book
 import com.demo.project.librarystore.exception.ResourceNotFoundException
 import com.demo.project.librarystore.model.BookModel
 import com.demo.project.librarystore.model.toModel
+import com.demo.project.librarystore.repository.AuthorRepository
 import com.demo.project.librarystore.repository.BookRepository
 import java.lang.RuntimeException
 import org.apache.commons.lang3.NotImplementedException
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service
 @Service
 class BookService(
     private val bookRepository: BookRepository,
+    private val authorRepository: AuthorRepository,
 ) {
     fun getBookByIdOrThrow(bookId: Int): BookModel {
         bookRepository.getBookById(bookId)?.let {
@@ -27,14 +29,11 @@ class BookService(
         publishStatus: Boolean,
         authorIds: List<Int>
     ): Int {
-        // TODO: check author exist
         val exist: Book? = bookRepository.getBookById(id)
         if (exist != null) {
             throw BadRequestException("Book id already used.")
         }
-        if (authorIds.isEmpty()) {
-            throw BadRequestException("Book must have at least one author.")
-        }
+        validateBookAuthorIds(authorIds, false)
         return bookRepository.createBook(id, title, price, publishStatus, authorIds)
             ?: throw RuntimeException("Book not created")
     }
@@ -46,10 +45,7 @@ class BookService(
         publishStatus: Boolean?,
         authorIds: List<Int>?,
     ) {
-        // TODO: check author exist
-        if (authorIds != null && authorIds.isEmpty()) {
-            throw BadRequestException("Book must have at least one author.")
-        }
+        validateBookAuthorIds(authorIds, true)
         val exist = getBookByIdOrThrow(id)
         if (exist.publishedStatus && publishStatus == false) {
             throw BadRequestException("Book cannot be changed to unpublished status.")
@@ -65,5 +61,20 @@ class BookService(
 
     fun getBooksByAuthorId(authorId: Int): List<BookModel> {
         return bookRepository.getBooksByAuthorId(authorId).map { it.toModel() }
+    }
+
+    private fun validateBookAuthorIds(authorIds: List<Int>?, acceptNull: Boolean) {
+        if (authorIds == null) {
+            if (acceptNull) {
+                return
+            }
+            throw BadRequestException("Book must have at least one author.")
+        }
+        if (authorIds.isEmpty()) {
+            throw BadRequestException("Book must have at least one author.")
+        }
+        if (!authorRepository.checkAllAuthorsExist(authorIds)) {
+            throw ResourceNotFoundException("Includes non-existent author.")
+        }
     }
 }

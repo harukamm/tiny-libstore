@@ -3,6 +3,7 @@ package com.demo.project.librarystore.service
 import com.demo.project.librarystore.entity.Author
 import com.demo.project.librarystore.entity.Book
 import com.demo.project.librarystore.exception.ResourceNotFoundException
+import com.demo.project.librarystore.repository.AuthorRepository
 import com.demo.project.librarystore.repository.BookRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -13,6 +14,7 @@ import java.time.LocalDate
 import org.apache.coyote.BadRequestException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
+import org.mockito.ArgumentMatchers.anyList
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.lenient
 import org.mockito.Mockito.times
@@ -22,12 +24,14 @@ import org.mockito.Mockito.verify
 @SpringBootTest
 class BookServiceMockTest {
     private lateinit var bookRepository: BookRepository
+    private lateinit var authorRepository: AuthorRepository
     private lateinit var service: BookService
 
     @BeforeEach
     fun setup() {
         bookRepository = mock(BookRepository::class.java)
-        service = BookService(bookRepository)
+        authorRepository = mock(AuthorRepository::class.java)
+        service = BookService(bookRepository, authorRepository)
     }
 
     @Test
@@ -60,6 +64,9 @@ class BookServiceMockTest {
 
     @Test
     fun `createBook returns new book id`() {
+        lenient().doReturn(true)
+            .`when`(authorRepository)
+            .checkAllAuthorsExist(listOf(1))
         lenient().doReturn(100)
             .`when`(bookRepository)
             .createBook(100, "Test Book", 100, true, listOf(1))
@@ -98,6 +105,9 @@ class BookServiceMockTest {
         lenient().doReturn(Book(1, "Title", 50, false, listOf(author)))
             .`when`(bookRepository)
             .getBookById(anyInt())
+        lenient().doReturn(true)
+            .`when`(authorRepository)
+            .checkAllAuthorsExist(listOf(1))
 
         service.updateBook(1, "Updated Title", 200, false, listOf(1))
 
@@ -110,6 +120,9 @@ class BookServiceMockTest {
         lenient().doReturn(null)
             .`when`(bookRepository)
             .getBookById(1)
+        lenient().doReturn(true)
+            .`when`(authorRepository)
+            .checkAllAuthorsExist(listOf(1))
 
         val e = Assertions.assertThrows(ResourceNotFoundException::class.java) {
             service.updateBook(1, "Updated Title", 200, false, listOf(1))

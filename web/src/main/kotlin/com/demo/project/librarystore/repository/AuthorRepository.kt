@@ -27,6 +27,15 @@ class AuthorRepository(private val context: DSLContext) {
             .fetchInto(Author::class.java)
     }
 
+    fun checkAllAuthorsExist(authorIds: List<Int>): Boolean {
+        val idSet = authorIds.toSet()
+        return context.selectCount()
+            .from(AUTHOR)
+            .where(AUTHOR.ID.`in`(idSet))
+            .fetchOne()
+            ?.value1() == idSet.size
+    }
+
     fun createAuthor(id: Int, name: String, birthDate: LocalDate): Int? {
         return context.insertInto(AUTHOR)
             .set(AUTHOR.ID, id)

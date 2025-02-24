@@ -65,6 +65,18 @@ class AuthorRepositoryTest(
     }
 
     @Test
+    fun `checkAllAuthorsExist returns true when all authors exist`() {
+        val authorId1 = createAuthor(1, "Test Author 1", LocalDate.of(1991, 1, 1))
+        val authorId2 = createAuthor(2, "Test Author 2", LocalDate.of(1992, 2, 2))
+        val authorId3 = createAuthor(3, "Test Author 3", LocalDate.of(1993, 3, 3))
+
+        assertThat(repository.checkAllAuthorsExist(listOf(authorId1, authorId2))).isTrue()
+        assertThat(repository.checkAllAuthorsExist(listOf(authorId1, authorId1, authorId1))).isTrue()
+        assertThat(repository.checkAllAuthorsExist(listOf(authorId1, authorId2, authorId3))).isTrue()
+        assertThat(repository.checkAllAuthorsExist(listOf(authorId1, authorId2, authorId3, 999))).isFalse()
+    }
+
+    @Test
     fun `createAuthor creates author successfully`() {
         val authorId = repository.createAuthor(42, "New Author", LocalDate.of(1990, 1, 1))
         assertThat(authorId).isEqualTo(42)
