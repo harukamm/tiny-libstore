@@ -20,7 +20,9 @@ data class CreateBookRequest(
 )
 
 data class UpdateBookRequest(
+    @field:NotBlank
     val title: String?,
+    @field:Min(0)
     val price: Int?,
     val publishStatus: Boolean?,
     @field:Size(min = 1, max = 50)
