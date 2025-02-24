@@ -2,6 +2,7 @@ package com.demo.project.librarystore.service
 
 import com.demo.project.librarystore.entity.Author
 import com.demo.project.librarystore.entity.Book
+import com.demo.project.librarystore.exception.ResourceNotFoundException
 import com.demo.project.librarystore.repository.BookRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -9,6 +10,7 @@ import org.mockito.Mockito.mock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
+import org.apache.coyote.BadRequestException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.mockito.Mockito.anyInt
@@ -49,7 +51,7 @@ class BookServiceMockTest {
             .`when`(bookRepository)
             .getBookById(anyInt())
 
-        val e = Assertions.assertThrows(IllegalArgumentException::class.java) {
+        val e = Assertions.assertThrows(ResourceNotFoundException::class.java) {
             service.getBookByIdOrThrow(10)
         }
 
@@ -69,7 +71,7 @@ class BookServiceMockTest {
 
     @Test
     fun `createBook fails with empty author`() {
-        val e = Assertions.assertThrows(IllegalArgumentException::class.java) {
+        val e = Assertions.assertThrows(BadRequestException::class.java) {
             service.createBook(100, "Test Book", 100, true, listOf())
         }
 
@@ -83,7 +85,7 @@ class BookServiceMockTest {
             .`when`(bookRepository)
             .getBookById(anyInt())
 
-        val e = Assertions.assertThrows(IllegalArgumentException::class.java) {
+        val e = Assertions.assertThrows(BadRequestException::class.java) {
             service.createBook(10, "Test Book", 100, true, listOf(1))
         }
 
@@ -109,7 +111,7 @@ class BookServiceMockTest {
             .`when`(bookRepository)
             .getBookById(1)
 
-        val e = Assertions.assertThrows(IllegalArgumentException::class.java) {
+        val e = Assertions.assertThrows(ResourceNotFoundException::class.java) {
             service.updateBook(1, "Updated Title", 200, false, listOf(1))
         }
 
@@ -123,7 +125,7 @@ class BookServiceMockTest {
             .`when`(bookRepository)
             .getBookById(1)
 
-        val e = Assertions.assertThrows(IllegalArgumentException::class.java) {
+        val e = Assertions.assertThrows(BadRequestException::class.java) {
             service.updateBook(1, "Updated Title", 200, true, listOf())
         }
 
@@ -137,11 +139,11 @@ class BookServiceMockTest {
             .`when`(bookRepository)
             .getBookById(1)
 
-        val e = Assertions.assertThrows(IllegalArgumentException::class.java) {
+        val e = Assertions.assertThrows(BadRequestException::class.java) {
             service.updateBook(1, null, null, false, null)
         }
 
-        assertThat(e.message).isEqualTo("Book cannot be unpublished.")
+        assertThat(e.message).isEqualTo("Book cannot be changed to unpublished status.")
     }
 
     @Test

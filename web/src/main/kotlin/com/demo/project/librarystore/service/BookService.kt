@@ -1,10 +1,13 @@
 package com.demo.project.librarystore.service
 
 import com.demo.project.librarystore.entity.Book
+import com.demo.project.librarystore.exception.ResourceNotFoundException
 import com.demo.project.librarystore.model.BookModel
 import com.demo.project.librarystore.model.toModel
 import com.demo.project.librarystore.repository.BookRepository
+import java.lang.RuntimeException
 import org.apache.commons.lang3.NotImplementedException
+import org.apache.coyote.BadRequestException
 import org.springframework.stereotype.Service
 
 @Service
@@ -18,7 +21,7 @@ class BookService(
     fun getBookByIdOrThrow(bookId: Int): BookModel {
         bookRepository.getBookById(bookId)?.let {
             return it.toModel()
-        } ?: throw IllegalArgumentException("Book not found.")
+        } ?: throw ResourceNotFoundException("Book not found.")
     }
 
     fun createBook(
@@ -28,15 +31,16 @@ class BookService(
         publishStatus: Boolean,
         authorIds: List<Int>
     ): Int {
+        // TODO: check author exist
         val exist: Book? = bookRepository.getBookById(id)
         if (exist != null) {
-            throw IllegalArgumentException("Book id already used.")
+            throw BadRequestException("Book id already used.")
         }
         if (authorIds.isEmpty()) {
-            throw IllegalArgumentException("Book must have at least one author.")
+            throw BadRequestException("Book must have at least one author.")
         }
         return bookRepository.createBook(id, title, price, publishStatus, authorIds)
-            ?: throw IllegalArgumentException("Book not created")
+            ?: throw RuntimeException("Book not created")
     }
 
     fun updateBook(
@@ -46,12 +50,13 @@ class BookService(
         publishStatus: Boolean?,
         authorIds: List<Int>?,
     ) {
+        // TODO: check author exist
         if (authorIds != null && authorIds.isEmpty()) {
-            throw IllegalArgumentException("Book must have at least one author.")
+            throw BadRequestException("Book must have at least one author.")
         }
         val exist = getBookByIdOrThrow(id)
         if (exist.publishedStatus && publishStatus == false) {
-            throw IllegalArgumentException("Book cannot changed to unpublished status.")
+            throw BadRequestException("Book cannot be changed to unpublished status.")
         }
 
         bookRepository.updateBook(id, title, price, publishStatus, authorIds)

@@ -1,8 +1,10 @@
 package com.demo.project.librarystore.service
 
+import com.demo.project.librarystore.exception.ResourceNotFoundException
 import com.demo.project.librarystore.model.AuthorModel
 import com.demo.project.librarystore.model.toModel
 import com.demo.project.librarystore.repository.AuthorRepository
+import java.lang.RuntimeException
 import java.time.LocalDate
 import org.springframework.stereotype.Service
 
@@ -17,7 +19,7 @@ class AuthorService(
 
     fun getAuthorByIdOrThrow(id: Int): AuthorModel {
         return authorRepository.getAuthorById(id)?.toModel()
-            ?: throw IllegalArgumentException("Author not found.")
+            ?: throw ResourceNotFoundException("Author not found.")
     }
 
     fun getAuthorByName(name: String): List<AuthorModel> {
@@ -26,10 +28,10 @@ class AuthorService(
 
     fun createAuthor(id: Int, name: String, birthDate: LocalDate): Int {
         authorRepository.getAuthorById(id)?.let {
-            throw IllegalArgumentException("Author id already used.")
+            throw ResourceNotFoundException("Author id already used.")
         }
         return authorRepository.createAuthor(id, name, birthDate)
-            ?: throw IllegalArgumentException("Author not created.")
+            ?: throw RuntimeException("Author not created.")
     }
 
     fun updateAuthor(id: Int, name: String?, birthDate: LocalDate?) {
