@@ -75,6 +75,9 @@ class BookService(
         if (authorIds.isEmpty()) {
             throw BadRequestException("Book must have at least one author.")
         }
+        if (authorIds.toSet().size != authorIds.size) {
+            throw BadRequestException("Includes duplicate author.")
+        }
         if (!authorRepository.checkAllAuthorsExist(authorIds)) {
             throw ResourceNotFoundException("Includes non-existent author.")
         }

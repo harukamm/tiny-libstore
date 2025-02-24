@@ -134,6 +134,20 @@ class BookControllerTest(
     }
 
     @Test
+    fun `create book fails with duplicate authors`() {
+        mockMvc.perform(
+            post("/lib-store/v1.0/books")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    "{\"id\":1,\"title\":\"New Book\",\"price\":150,\"publishedStatus\":true,\"authorIds\":[1, 1, 2]}",
+                ),
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.error").value("Includes duplicate author."))
+    }
+
+    @Test
     fun `update book fails with empty author id`() {
         mockMvc.perform(
             put("/lib-store/v1.0/books/{bookId}", 1)
