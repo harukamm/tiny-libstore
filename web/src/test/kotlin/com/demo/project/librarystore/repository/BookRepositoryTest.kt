@@ -141,7 +141,7 @@ class BookRepositoryTest(
     }
 
     @Test
-    fun `updateBook updates book attributes and authors`() {
+    fun `updateBook updates book attributes and authors at once`() {
         val authorId1 = createAuthor(1, "Test Author 1", LocalDate.of(1991, 1, 1))
         val authorId2 = createAuthor(2, "Test Author 2", LocalDate.of(1992, 2, 2))
         val authorId3 = createAuthor(3, "Test Author 3", LocalDate.of(1993, 3, 3))
