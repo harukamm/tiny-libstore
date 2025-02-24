@@ -24,7 +24,7 @@ class AuthorController(
 ) {
     @Operation(
         summary = "Get all authors",
-        description = "Get all authors."
+        description = "Get all authors.",
     )
     @GetMapping("/authors")
     fun getAllAuthors(): List<AuthorModel> {
@@ -33,40 +33,46 @@ class AuthorController(
 
     @Operation(
         summary = "Get author by ID",
-        description = "Get author by ID. Fails if the author does not exist."
+        description = "Get author by ID. Fails if the author does not exist.",
     )
     @GetMapping("/authors/{authorId}")
-    fun getAuthorById(@PathVariable authorId: Int): AuthorModel {
+    fun getAuthorById(
+        @PathVariable authorId: Int,
+    ): AuthorModel {
         return authorService.getAuthorByIdOrThrow(authorId)
     }
 
     @Operation(
         summary = "Create author",
-        description = "Create a new author. Fails if the ID is already taken."
+        description = "Create a new author. Fails if the ID is already taken.",
     )
     @PostMapping("/authors")
-    fun createAuthor(@Valid @RequestBody request: CreateAuthorRequest): NewIdCreatedResponse {
+    fun createAuthor(
+        @Valid @RequestBody request: CreateAuthorRequest,
+    ): NewIdCreatedResponse {
         return NewIdCreatedResponse(authorService.createAuthor(request.id, request.name, request.birthDay))
     }
 
     @Operation(
         summary = "Update author",
-        description = "Update author by ID. Fails if the author does not exist."
+        description = "Update author by ID. Fails if the author does not exist.",
     )
     @PutMapping("/authors/{authorId}")
     fun updateAuthor(
         @PathVariable authorId: Int,
-        @Valid @RequestBody request: UpdateAuthorRequest
+        @Valid @RequestBody request: UpdateAuthorRequest,
     ) {
         return authorService.updateAuthor(authorId, request.name, request.birthDay)
     }
 
     @Operation(
         summary = "Delete author",
-        description = "Delete author by ID. Fails if the author does not exist."
+        description = "Delete author by ID. Fails if the author does not exist.",
     )
     @DeleteMapping("/authors/{authorId}")
-    fun deleteAuthor(@PathVariable authorId: Int) {
+    fun deleteAuthor(
+        @PathVariable authorId: Int,
+    ) {
         authorService.deleteAuthorById(authorId)
     }
 }

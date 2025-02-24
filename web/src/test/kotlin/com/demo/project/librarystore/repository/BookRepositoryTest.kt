@@ -3,18 +3,17 @@ package com.demo.project.librarystore.repository
 import com.demo.project.librarystore.JooqIntegrationBase
 import com.demo.project.librarystore.entity.Author
 import com.demo.project.librarystore.entity.Book
-import java.time.LocalDate
 import org.assertj.core.api.Assertions.assertThat
 import org.jooq.DSLContext
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 
 class BookRepositoryTest(
     @Autowired private val repository: BookRepository,
     @Autowired private val context: DSLContext,
 ) : JooqIntegrationBase(context) {
-
     @Test
     fun `getBookById returns a book when found`() {
         val id = createBook(10, "Test Book", 100, true)
@@ -45,9 +44,11 @@ class BookRepositoryTest(
         assertThat(bookA?.id).isEqualTo(1)
         assertThat(bookA?.authors).hasSize(2)
         assertThat(bookA?.authors?.get(0)).isEqualTo(
-            Author(authorId1, "Test Author 1", LocalDate.of(1991, 1, 1)))
+            Author(authorId1, "Test Author 1", LocalDate.of(1991, 1, 1)),
+        )
         assertThat(bookA?.authors?.get(1)).isEqualTo(
-            Author(authorId2, "Test Author 2", LocalDate.of(1992, 2, 2)))
+            Author(authorId2, "Test Author 2", LocalDate.of(1992, 2, 2)),
+        )
 
         val bookB = repository.getBookById(bookIdB)
 
@@ -55,7 +56,8 @@ class BookRepositoryTest(
         assertThat(bookB?.id).isEqualTo(2)
         assertThat(bookB?.authors).hasSize(1)
         assertThat(bookB?.authors?.get(0)).isEqualTo(
-            Author(authorId3, "Test Author 3", LocalDate.of(1993, 3, 3)))
+            Author(authorId3, "Test Author 3", LocalDate.of(1993, 3, 3)),
+        )
     }
 
     @Test
@@ -72,14 +74,19 @@ class BookRepositoryTest(
 
         assertThat(books).hasSize(2)
         assertThat(books).contains(
-            Book(1, "Test Book 1", 42, false,
+            Book(
+                1,
+                "Test Book 1",
+                42,
+                false,
                 listOf(
                     Author(1, "Test Author", LocalDate.of(1991, 1, 1)),
-                    Author(2, "Test Author 2", LocalDate.of(1992, 2, 2))
-                ))
+                    Author(2, "Test Author 2", LocalDate.of(1992, 2, 2)),
+                ),
+            ),
         )
         assertThat(books).contains(
-            Book(2, "Test Book 2", 42, false, listOf(Author(1, "Test Author", LocalDate.of(1991, 1, 1))))
+            Book(2, "Test Book 2", 42, false, listOf(Author(1, "Test Author", LocalDate.of(1991, 1, 1)))),
         )
     }
 

@@ -5,20 +5,19 @@ import com.demo.project.librarystore.entity.Book
 import com.demo.project.librarystore.exception.ResourceNotFoundException
 import com.demo.project.librarystore.repository.AuthorRepository
 import com.demo.project.librarystore.repository.BookRepository
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.mockito.Mockito.mock
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
-import java.time.LocalDate
 import org.apache.coyote.BadRequestException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
-import org.mockito.ArgumentMatchers.anyList
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.lenient
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ActiveProfiles
+import java.time.LocalDate
 
 @ActiveProfiles("TEST")
 @SpringBootTest
@@ -55,9 +54,10 @@ class BookServiceMockTest {
             .`when`(bookRepository)
             .getBookById(anyInt())
 
-        val e = Assertions.assertThrows(ResourceNotFoundException::class.java) {
-            service.getBookByIdOrThrow(10)
-        }
+        val e =
+            Assertions.assertThrows(ResourceNotFoundException::class.java) {
+                service.getBookByIdOrThrow(10)
+            }
 
         assertThat(e.message).isEqualTo("Book not found.")
     }
@@ -78,9 +78,10 @@ class BookServiceMockTest {
 
     @Test
     fun `createBook fails with empty author`() {
-        val e = Assertions.assertThrows(BadRequestException::class.java) {
-            service.createBook(100, "Test Book", 100, true, listOf())
-        }
+        val e =
+            Assertions.assertThrows(BadRequestException::class.java) {
+                service.createBook(100, "Test Book", 100, true, listOf())
+            }
 
         assertThat(e.message).isEqualTo("Book must have at least one author.")
     }
@@ -92,9 +93,10 @@ class BookServiceMockTest {
             .`when`(bookRepository)
             .getBookById(anyInt())
 
-        val e = Assertions.assertThrows(BadRequestException::class.java) {
-            service.createBook(10, "Test Book", 100, true, listOf(1))
-        }
+        val e =
+            Assertions.assertThrows(BadRequestException::class.java) {
+                service.createBook(10, "Test Book", 100, true, listOf(1))
+            }
 
         assertThat(e.message).isEqualTo("Book id already used.")
     }
@@ -124,9 +126,10 @@ class BookServiceMockTest {
             .`when`(authorRepository)
             .checkAllAuthorsExist(listOf(1))
 
-        val e = Assertions.assertThrows(ResourceNotFoundException::class.java) {
-            service.updateBook(1, "Updated Title", 200, false, listOf(1))
-        }
+        val e =
+            Assertions.assertThrows(ResourceNotFoundException::class.java) {
+                service.updateBook(1, "Updated Title", 200, false, listOf(1))
+            }
 
         assertThat(e.message).isEqualTo("Book not found.")
     }
@@ -138,9 +141,10 @@ class BookServiceMockTest {
             .`when`(bookRepository)
             .getBookById(1)
 
-        val e = Assertions.assertThrows(BadRequestException::class.java) {
-            service.updateBook(1, "Updated Title", 200, true, listOf())
-        }
+        val e =
+            Assertions.assertThrows(BadRequestException::class.java) {
+                service.updateBook(1, "Updated Title", 200, true, listOf())
+            }
 
         assertThat(e.message).isEqualTo("Book must have at least one author.")
     }
@@ -152,9 +156,10 @@ class BookServiceMockTest {
             .`when`(bookRepository)
             .getBookById(1)
 
-        val e = Assertions.assertThrows(BadRequestException::class.java) {
-            service.updateBook(1, null, null, false, null)
-        }
+        val e =
+            Assertions.assertThrows(BadRequestException::class.java) {
+                service.updateBook(1, null, null, false, null)
+            }
 
         assertThat(e.message).isEqualTo("Book cannot be changed to unpublished status.")
     }

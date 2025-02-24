@@ -4,10 +4,9 @@ import com.demo.project.librarystore.exception.ResourceNotFoundException
 import com.demo.project.librarystore.model.AuthorModel
 import com.demo.project.librarystore.model.toModel
 import com.demo.project.librarystore.repository.AuthorRepository
+import org.springframework.stereotype.Service
 import java.lang.RuntimeException
 import java.time.LocalDate
-import org.springframework.stereotype.Service
-
 
 @Service
 class AuthorService(
@@ -26,7 +25,11 @@ class AuthorService(
         return authorRepository.getAuthorByName(name).map { it.toModel() }
     }
 
-    fun createAuthor(id: Int, name: String, birthDate: LocalDate): Int {
+    fun createAuthor(
+        id: Int,
+        name: String,
+        birthDate: LocalDate,
+    ): Int {
         authorRepository.getAuthorById(id)?.let {
             throw ResourceNotFoundException("Author id already used.")
         }
@@ -34,7 +37,11 @@ class AuthorService(
             ?: throw RuntimeException("Author not created.")
     }
 
-    fun updateAuthor(id: Int, name: String?, birthDate: LocalDate?) {
+    fun updateAuthor(
+        id: Int,
+        name: String?,
+        birthDate: LocalDate?,
+    ) {
         getAuthorByIdOrThrow(id)
         authorRepository.updateAuthor(id, name, birthDate)
     }

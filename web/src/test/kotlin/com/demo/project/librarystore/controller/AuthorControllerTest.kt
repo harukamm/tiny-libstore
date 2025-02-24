@@ -3,7 +3,6 @@ package com.demo.project.librarystore.controller
 import com.demo.project.librarystore.JooqIntegrationBase
 import com.demo.project.librarystore.config.ExceptionHandler
 import com.demo.project.librarystore.service.AuthorService
-import java.time.LocalDate
 import org.hamcrest.Matchers
 import org.jooq.DSLContext
 import org.junit.jupiter.api.BeforeEach
@@ -19,9 +18,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import java.time.LocalDate
 
 @SpringBootTest
 @ActiveProfiles("TEST")
@@ -30,14 +30,14 @@ class AuthorControllerTest(
     @Autowired private val authorService: AuthorService,
     @Autowired private val dslContext: DSLContext,
 ) : JooqIntegrationBase(dslContext) {
-
     private lateinit var mockMvc: MockMvc
 
     @BeforeEach
     fun setup() {
-        mockMvc = MockMvcBuilders.standaloneSetup(controller)
-            .setControllerAdvice(ExceptionHandler())
-            .build()
+        mockMvc =
+            MockMvcBuilders.standaloneSetup(controller)
+                .setControllerAdvice(ExceptionHandler())
+                .build()
     }
 
     @Test
@@ -46,7 +46,7 @@ class AuthorControllerTest(
 
         mockMvc.perform(
             get("/lib-store/v1.0/authors/1")
-                .contentType(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON),
         )
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -60,7 +60,7 @@ class AuthorControllerTest(
         mockMvc.perform(
             post("/lib-store/v1.0/authors")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"id\": 123, \"name\": \"Test Author\", \"birthDay\": \"1991-01-01\"}")
+                .content("{\"id\": 123, \"name\": \"Test Author\", \"birthDay\": \"1991-01-01\"}"),
         )
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -72,7 +72,7 @@ class AuthorControllerTest(
         mockMvc.perform(
             post("/lib-store/v1.0/authors")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"id\": 123}")
+                .content("{\"id\": 123}"),
         )
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("$.error", Matchers.containsString("JSON property name due to missing")))
@@ -83,7 +83,7 @@ class AuthorControllerTest(
         mockMvc.perform(
             post("/lib-store/v1.0/authors")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"id\": 123, \"name\": \"\", \"birthDay\": \"1991\"}")
+                .content("{\"id\": 123, \"name\": \"\", \"birthDay\": \"1991\"}"),
         )
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("$.error", Matchers.containsString("Text '1991' could not be parsed")))
@@ -94,7 +94,7 @@ class AuthorControllerTest(
         mockMvc.perform(
             post("/lib-store/v1.0/authors")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"id\": 123, \"name\": \"Test Author\", \"birthDay\": \"2991-01-01\"}")
+                .content("{\"id\": 123, \"name\": \"Test Author\", \"birthDay\": \"2991-01-01\"}"),
         )
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("$.error").value("pastDate: Only past dates are allowed."))
@@ -105,7 +105,7 @@ class AuthorControllerTest(
         mockMvc.perform(
             put("/lib-store/v1.0/authors/{authorId}", 1)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"name\": \"\", \"birthDay\": \"1999-01-01\"}")
+                .content("{\"name\": \"\", \"birthDay\": \"1999-01-01\"}"),
         )
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("$.error").value("name: must not be blank"))

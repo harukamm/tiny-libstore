@@ -2,11 +2,11 @@ package com.demo.project.librarystore.repository
 
 import com.demo.project.librarystore.JooqIntegrationBase
 import com.demo.project.librarystore.entity.Author
-import java.time.LocalDate
 import org.assertj.core.api.Assertions.assertThat
 import org.jooq.DSLContext
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 
 class AuthorRepositoryTest(
     @Autowired private val repository: AuthorRepository,

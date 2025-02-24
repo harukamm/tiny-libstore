@@ -6,8 +6,8 @@ import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
-import java.time.LocalDate
 import org.springframework.format.annotation.DateTimeFormat
+import java.time.LocalDate
 
 data class CreateBookRequest(
     @field:Min(1)
@@ -37,7 +37,7 @@ data class CreateAuthorRequest(
     val id: Int,
     @field:NotBlank
     val name: String,
-    @JsonFormat(pattern="yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     val birthDay: LocalDate,
 ) {
     @AssertTrue(message = "Only past dates are allowed.")

@@ -3,7 +3,6 @@ package com.demo.project.librarystore.service
 import com.demo.project.librarystore.entity.Author
 import com.demo.project.librarystore.exception.ResourceNotFoundException
 import com.demo.project.librarystore.repository.AuthorRepository
-import java.time.LocalDate
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -15,6 +14,7 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
+import java.time.LocalDate
 
 @ActiveProfiles("TEST")
 @SpringBootTest
@@ -48,9 +48,10 @@ class AuthorServiceMockTest {
             .`when`(authorRepository)
             .getAuthorById(10)
 
-        val e = Assertions.assertThrows(ResourceNotFoundException::class.java) {
-            service.getAuthorByIdOrThrow(10)
-        }
+        val e =
+            Assertions.assertThrows(ResourceNotFoundException::class.java) {
+                service.getAuthorByIdOrThrow(10)
+            }
         assertThat(e.message).isEqualTo("Author not found.")
     }
 
@@ -84,9 +85,10 @@ class AuthorServiceMockTest {
             .`when`(authorRepository)
             .createAuthor(10, "Test Author", LocalDate.of(1991, 1, 1))
 
-        val e = Assertions.assertThrows(RuntimeException::class.java) {
-            service.createAuthor(10, "Test Author", LocalDate.of(1991, 1, 1))
-        }
+        val e =
+            Assertions.assertThrows(RuntimeException::class.java) {
+                service.createAuthor(10, "Test Author", LocalDate.of(1991, 1, 1))
+            }
         assertThat(e.message).isEqualTo("Author not created.")
     }
 
@@ -109,9 +111,10 @@ class AuthorServiceMockTest {
             .`when`(authorRepository)
             .getAuthorById(anyInt())
 
-        val e = Assertions.assertThrows(ResourceNotFoundException::class.java) {
-            service.updateAuthor(1, "Updated Author", LocalDate.of(1992, 2, 2))
-        }
+        val e =
+            Assertions.assertThrows(ResourceNotFoundException::class.java) {
+                service.updateAuthor(1, "Updated Author", LocalDate.of(1992, 2, 2))
+            }
         assertThat(e.message).isEqualTo("Author not found.")
     }
 
@@ -134,9 +137,10 @@ class AuthorServiceMockTest {
             .`when`(authorRepository)
             .getAuthorById(anyInt())
 
-        val e = Assertions.assertThrows(ResourceNotFoundException::class.java) {
-            service.deleteAuthorById(1)
-        }
+        val e =
+            Assertions.assertThrows(ResourceNotFoundException::class.java) {
+                service.deleteAuthorById(1)
+            }
         assertThat(e.message).isEqualTo("Author not found.")
     }
 }

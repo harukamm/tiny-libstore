@@ -6,10 +6,9 @@ import com.demo.project.librarystore.model.BookModel
 import com.demo.project.librarystore.model.toModel
 import com.demo.project.librarystore.repository.AuthorRepository
 import com.demo.project.librarystore.repository.BookRepository
-import java.lang.RuntimeException
-import org.apache.commons.lang3.NotImplementedException
 import org.apache.coyote.BadRequestException
 import org.springframework.stereotype.Service
+import java.lang.RuntimeException
 
 @Service
 class BookService(
@@ -27,7 +26,7 @@ class BookService(
         title: String,
         price: Int,
         publishStatus: Boolean,
-        authorIds: List<Int>
+        authorIds: List<Int>,
     ): Int {
         val exist: Book? = bookRepository.getBookById(id)
         if (exist != null) {
@@ -63,7 +62,10 @@ class BookService(
         return bookRepository.getBooksByAuthorId(authorId).map { it.toModel() }
     }
 
-    private fun validateBookAuthorIds(authorIds: List<Int>?, acceptNull: Boolean) {
+    private fun validateBookAuthorIds(
+        authorIds: List<Int>?,
+        acceptNull: Boolean,
+    ) {
         if (authorIds == null) {
             if (acceptNull) {
                 return

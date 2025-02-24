@@ -3,12 +3,12 @@ package com.demo.project.librarystore
 import com.demo.project.librarystore.jooq.generated.tables.references.AUTHOR
 import com.demo.project.librarystore.jooq.generated.tables.references.BOOK
 import com.demo.project.librarystore.jooq.generated.tables.references.BOOK_AUTHOR
-import java.lang.RuntimeException
-import java.time.LocalDate
 import org.jooq.DSLContext
 import org.junit.jupiter.api.AfterEach
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
+import java.lang.RuntimeException
+import java.time.LocalDate
 
 @SpringBootTest
 @ActiveProfiles("TEST")
@@ -20,7 +20,11 @@ abstract class JooqIntegrationBase(private val context: DSLContext) {
         context.deleteFrom(AUTHOR).execute()
     }
 
-    protected fun createAuthor(authorId: Int, name: String, birthDay: LocalDate): Int {
+    protected fun createAuthor(
+        authorId: Int,
+        name: String,
+        birthDay: LocalDate,
+    ): Int {
         return context.insertInto(AUTHOR)
             .columns(AUTHOR.ID, AUTHOR.NAME, AUTHOR.BIRTH_DAY)
             .values(authorId, name, birthDay)
@@ -30,7 +34,12 @@ abstract class JooqIntegrationBase(private val context: DSLContext) {
             ?: throw RuntimeException("Author not created")
     }
 
-    protected fun createBook(id: Int, title: String, price: Int, publishStatus: Boolean): Int {
+    protected fun createBook(
+        id: Int,
+        title: String,
+        price: Int,
+        publishStatus: Boolean,
+    ): Int {
         return context.insertInto(BOOK)
             .columns(BOOK.ID, BOOK.TITLE, BOOK.PRICE, BOOK.PUBLISHED_STATUS)
             .values(id, title, price, if (publishStatus) 1 else 0)
@@ -40,7 +49,10 @@ abstract class JooqIntegrationBase(private val context: DSLContext) {
             ?: throw RuntimeException("Book not created")
     }
 
-    protected fun createBookAuthor(bookId: Int, authorId: Int) {
+    protected fun createBookAuthor(
+        bookId: Int,
+        authorId: Int,
+    ) {
         context.insertInto(BOOK_AUTHOR)
             .columns(BOOK_AUTHOR.BOOK_ID, BOOK_AUTHOR.AUTHOR_ID)
             .values(bookId, authorId)
@@ -50,7 +62,7 @@ abstract class JooqIntegrationBase(private val context: DSLContext) {
     protected fun getBookAuthorsRecordCount(bookId: Int): Int {
         return context.select(
             BOOK_AUTHOR.BOOK_ID,
-            BOOK_AUTHOR.AUTHOR_ID
+            BOOK_AUTHOR.AUTHOR_ID,
         )
             .from(BOOK_AUTHOR)
             .count()

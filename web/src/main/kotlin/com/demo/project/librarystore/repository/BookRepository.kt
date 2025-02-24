@@ -10,27 +10,27 @@ import org.jooq.impl.DSL.multiset
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Repository
 
-
-@SuppressWarnings("Duplicates")
 @Repository
 class BookRepository(
     private val context: DSLContext,
 ) {
     fun getBookById(id: Int): Book? {
-        val record = context.select(
-            BOOK.ID,
-            BOOK.TITLE,
-            BOOK.PRICE,
-            BOOK.PUBLISHED_STATUS,
-            multiset(
-                context.select(AUTHOR.ID, AUTHOR.NAME, AUTHOR.BIRTH_DAY)
-                    .from(AUTHOR)
-                    .join(BOOK_AUTHOR).on(AUTHOR.ID.eq(BOOK_AUTHOR.AUTHOR_ID))
-                    .where(BOOK_AUTHOR.BOOK_ID.eq(BOOK.ID))
-            ).`as`("authors").convertFrom { r -> r.into(Author::class.java) })
-            .from(BOOK)
-            .where(BOOK.ID.eq(id))
-            .fetchInto(Book::class.java)
+        val record =
+            context.select(
+                BOOK.ID,
+                BOOK.TITLE,
+                BOOK.PRICE,
+                BOOK.PUBLISHED_STATUS,
+                multiset(
+                    context.select(AUTHOR.ID, AUTHOR.NAME, AUTHOR.BIRTH_DAY)
+                        .from(AUTHOR)
+                        .join(BOOK_AUTHOR).on(AUTHOR.ID.eq(BOOK_AUTHOR.AUTHOR_ID))
+                        .where(BOOK_AUTHOR.BOOK_ID.eq(BOOK.ID)),
+                ).`as`("authors").convertFrom { r -> r.into(Author::class.java) },
+            )
+                .from(BOOK)
+                .where(BOOK.ID.eq(id))
+                .fetchInto(Book::class.java)
         return record.firstOrNull()
     }
 
@@ -44,14 +44,17 @@ class BookRepository(
                 context.select(AUTHOR.ID, AUTHOR.NAME, AUTHOR.BIRTH_DAY)
                     .from(AUTHOR)
                     .join(BOOK_AUTHOR).on(AUTHOR.ID.eq(BOOK_AUTHOR.AUTHOR_ID))
-                    .where(BOOK_AUTHOR.BOOK_ID.eq(BOOK.ID))
-            ).`as`("authors").convertFrom { r -> r.into(Author::class.java) })
+                    .where(BOOK_AUTHOR.BOOK_ID.eq(BOOK.ID)),
+            ).`as`("authors").convertFrom { r -> r.into(Author::class.java) },
+        )
             .from(BOOK)
-            .where(BOOK.ID.`in`(
-                context.select(BOOK_AUTHOR.BOOK_ID)
-                    .from(BOOK_AUTHOR)
-                    .where(BOOK_AUTHOR.AUTHOR_ID.eq(authorId))
-            ))
+            .where(
+                BOOK.ID.`in`(
+                    context.select(BOOK_AUTHOR.BOOK_ID)
+                        .from(BOOK_AUTHOR)
+                        .where(BOOK_AUTHOR.AUTHOR_ID.eq(authorId)),
+                ),
+            )
             .fetchInto(Book::class.java)
     }
 
@@ -63,25 +66,27 @@ class BookRepository(
         authorIds: List<Int>,
     ): Int? {
         return context.transactionResult { trx ->
-            val newId = trx.dsl().insertInto(BOOK)
-                .set(BOOK.ID, id)
-                .set(BOOK.TITLE, title)
-                .set(BOOK.PRICE, price)
-                .set(BOOK.PUBLISHED_STATUS, if (publishStatus) 1 else 0)
-                .returningResult(BOOK.ID)
-                .fetchOne()
-                ?.getValue(BOOK.ID)
+            val newId =
+                trx.dsl().insertInto(BOOK)
+                    .set(BOOK.ID, id)
+                    .set(BOOK.TITLE, title)
+                    .set(BOOK.PRICE, price)
+                    .set(BOOK.PUBLISHED_STATUS, if (publishStatus) 1 else 0)
+                    .returningResult(BOOK.ID)
+                    .fetchOne()
+                    ?.getValue(BOOK.ID)
 
             if (newId == null || newId != id) {
                 logger.error("Book not created")
                 return@transactionResult null
             }
 
-            val queries = authorIds.map {
-                trx.dsl().insertInto(BOOK_AUTHOR)
-                    .columns(BOOK_AUTHOR.BOOK_ID, BOOK_AUTHOR.AUTHOR_ID)
-                    .values(newId, it)
-            }
+            val queries =
+                authorIds.map {
+                    trx.dsl().insertInto(BOOK_AUTHOR)
+                        .columns(BOOK_AUTHOR.BOOK_ID, BOOK_AUTHOR.AUTHOR_ID)
+                        .values(newId, it)
+                }
             trx.dsl().batch(queries).execute()
 
             return@transactionResult newId
@@ -101,12 +106,13 @@ class BookRepository(
                     .where(BOOK_AUTHOR.BOOK_ID.eq(id))
                     .execute()
 
-               val queries = authorIds.map {
-                    trx.dsl().insertInto(BOOK_AUTHOR)
-                        .columns(BOOK_AUTHOR.BOOK_ID, BOOK_AUTHOR.AUTHOR_ID)
-                        .values(id, it)
-               }
-               trx.dsl().batch(queries).execute()
+                val queries =
+                    authorIds.map {
+                        trx.dsl().insertInto(BOOK_AUTHOR)
+                            .columns(BOOK_AUTHOR.BOOK_ID, BOOK_AUTHOR.AUTHOR_ID)
+                            .values(id, it)
+                    }
+                trx.dsl().batch(queries).execute()
             }
 
             val updateMap = mutableMapOf<Any, Any>()

@@ -24,33 +24,37 @@ class BookController(
 ) {
     @Operation(
         summary = "Get book by ID",
-        description = "Get book by ID. Fails if the book does not exist."
+        description = "Get book by ID. Fails if the book does not exist.",
     )
     @GetMapping("/books/{bookId}")
-    fun getBookById(@PathVariable bookId: Int): BookModel {
+    fun getBookById(
+        @PathVariable bookId: Int,
+    ): BookModel {
         return bookService.getBookByIdOrThrow(bookId)
     }
 
     @Operation(
         summary = "Create book",
-        description = "Create a new book. Fails if the ID is already taken."
+        description = "Create a new book. Fails if the ID is already taken.",
     )
     @PostMapping("/books")
-    fun createBook(@Valid @RequestBody request: CreateBookRequest): NewIdCreatedResponse {
+    fun createBook(
+        @Valid @RequestBody request: CreateBookRequest,
+    ): NewIdCreatedResponse {
         return NewIdCreatedResponse(
             bookService.createBook(
                 request.id,
                 request.title,
                 request.price,
                 request.publishStatus,
-                request.authorIds
-            )
+                request.authorIds,
+            ),
         )
     }
 
     @Operation(
         summary = "Update book",
-        description = "Update book by ID. Fails if the book does not exist."
+        description = "Update book by ID. Fails if the book does not exist.",
     )
     @PutMapping("/books/{bookId}")
     fun updateBook(
@@ -62,26 +66,31 @@ class BookController(
             request.title,
             request.price,
             request.publishStatus,
-            request.authorIds
+            request.authorIds,
         )
     }
 
     @Operation(
         summary = "Delete book",
-        description = "Delete book by ID. Fails if the book does not exist."
+        description = "Delete book by ID. Fails if the book does not exist.",
     )
     @DeleteMapping("/books/{bookId}")
-    fun deleteBook(@PathVariable bookId: Int) {
+    fun deleteBook(
+        @PathVariable bookId: Int,
+    ) {
         bookService.deleteBookById(bookId)
     }
 
     @Operation(
         summary = "Get books by author",
-        description = "Get books by author id.\n"
-                + "Event if the ID does not exist, the API will just return an empty list."
+        description =
+            "Get books by author id.\n" +
+                "Event if the ID does not exist, the API will just return an empty list.",
     )
     @GetMapping("/authors/{authorId}/books")
-    fun getBooksByAuthor(@PathVariable authorId: Int): List<BookModel> {
+    fun getBooksByAuthor(
+        @PathVariable authorId: Int,
+    ): List<BookModel> {
         return bookService.getBooksByAuthorId(authorId)
     }
 }

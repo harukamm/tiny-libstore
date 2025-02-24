@@ -2,8 +2,6 @@ package com.demo.project.librarystore.config
 
 import com.demo.project.librarystore.exception.ResourceNotFoundException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
-import java.sql.SQLException
-import java.time.format.DateTimeParseException
 import org.apache.coyote.BadRequestException
 import org.jooq.exception.DataAccessException
 import org.slf4j.Logger
@@ -14,10 +12,11 @@ import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
+import java.sql.SQLException
+import java.time.format.DateTimeParseException
 
 @ControllerAdvice
 class ExceptionHandler {
-
     @ExceptionHandler(ResourceNotFoundException::class)
     fun handleResourceNotFoundException(ex: ResourceNotFoundException): ResponseEntity<Any> {
         logger.info("Resource not found", ex)

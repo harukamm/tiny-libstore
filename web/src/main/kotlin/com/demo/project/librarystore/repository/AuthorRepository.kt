@@ -2,9 +2,9 @@ package com.demo.project.librarystore.repository
 
 import com.demo.project.librarystore.entity.Author
 import com.demo.project.librarystore.jooq.generated.tables.references.AUTHOR
-import java.time.LocalDate
 import org.jooq.DSLContext
 import org.springframework.stereotype.Repository
+import java.time.LocalDate
 
 @Repository
 class AuthorRepository(private val context: DSLContext) {
@@ -36,7 +36,11 @@ class AuthorRepository(private val context: DSLContext) {
             ?.value1() == idSet.size
     }
 
-    fun createAuthor(id: Int, name: String, birthDate: LocalDate): Int? {
+    fun createAuthor(
+        id: Int,
+        name: String,
+        birthDate: LocalDate,
+    ): Int? {
         return context.insertInto(AUTHOR)
             .set(AUTHOR.ID, id)
             .set(AUTHOR.NAME, name)
@@ -46,7 +50,11 @@ class AuthorRepository(private val context: DSLContext) {
             .getValue(0, AUTHOR.ID)
     }
 
-    fun updateAuthor(id: Int, name: String?, birthDate: LocalDate?) {
+    fun updateAuthor(
+        id: Int,
+        name: String?,
+        birthDate: LocalDate?,
+    ) {
         val updateMap = mutableMapOf<Any, Any>()
 
         name?.let { updateMap[AUTHOR.NAME] = it }

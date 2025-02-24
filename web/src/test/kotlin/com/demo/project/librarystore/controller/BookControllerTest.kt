@@ -4,7 +4,6 @@ import com.demo.project.librarystore.JooqIntegrationBase
 import com.demo.project.librarystore.config.ExceptionHandler
 import com.demo.project.librarystore.service.AuthorService
 import com.demo.project.librarystore.service.BookService
-import java.time.LocalDate
 import org.jooq.DSLContext
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -15,14 +14,15 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import java.time.LocalDate
 
 @SpringBootTest
 @ActiveProfiles("TEST")
@@ -32,14 +32,14 @@ class BookControllerTest(
     @Autowired private val authorService: AuthorService,
     @Autowired private val dslContext: DSLContext,
 ) : JooqIntegrationBase(dslContext) {
-
     private lateinit var mockMvc: MockMvc
 
     @BeforeEach
     fun setup() {
-        mockMvc = MockMvcBuilders.standaloneSetup(controller)
-            .setControllerAdvice(ExceptionHandler())
-            .build()
+        mockMvc =
+            MockMvcBuilders.standaloneSetup(controller)
+                .setControllerAdvice(ExceptionHandler())
+                .build()
     }
 
     @Test
@@ -50,7 +50,7 @@ class BookControllerTest(
 
         mockMvc.perform(
             get("/lib-store/v1.0/books/1")
-                .contentType(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON),
         )
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -69,7 +69,7 @@ class BookControllerTest(
     fun `book by id fails if book does not exist`() {
         mockMvc.perform(
             get("/lib-store/v1.0/books/1")
-                .contentType(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON),
         )
             .andExpect(status().isNotFound)
     }
@@ -82,7 +82,8 @@ class BookControllerTest(
             post("/lib-store/v1.0/books")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
-                    "{\"id\":1,\"title\":\"New Book\",\"price\":150,\"publishStatus\":true,\"authorIds\":[1]}")
+                    "{\"id\":1,\"title\":\"New Book\",\"price\":150,\"publishStatus\":true,\"authorIds\":[1]}",
+                ),
         )
             .andExpect(status().isOk)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -91,14 +92,16 @@ class BookControllerTest(
 
     @Test
     fun `create book fails with minus price`() {
-        val res = mockMvc.perform(
-            post("/lib-store/v1.0/books")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    "{\"id\":1,\"title\":\"New Book\",\"price\":-1,\"publishStatus\":true,\"authorIds\":[1]}")
-        )
-            .andExpect(status().isBadRequest)
-            .andReturn()
+        val res =
+            mockMvc.perform(
+                post("/lib-store/v1.0/books")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        "{\"id\":1,\"title\":\"New Book\",\"price\":-1,\"publishStatus\":true,\"authorIds\":[1]}",
+                    ),
+            )
+                .andExpect(status().isBadRequest)
+                .andReturn()
 
         logger.info("result: {}", res.response.contentAsString)
     }
@@ -109,7 +112,8 @@ class BookControllerTest(
             post("/lib-store/v1.0/books")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
-                    "{\"id\":1,\"title\":\"New Book\",\"price\":-1,\"publishStatus\":true,\"authorIds\":[]}")
+                    "{\"id\":1,\"title\":\"New Book\",\"price\":-1,\"publishStatus\":true,\"authorIds\":[]}",
+                ),
         )
             .andExpect(status().isBadRequest)
             .andReturn()
@@ -121,7 +125,8 @@ class BookControllerTest(
             post("/lib-store/v1.0/books")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
-                    "{\"id\":1,\"title\":\"New Book\",\"price\":150,\"publishStatus\":true,\"authorIds\":[99]}")
+                    "{\"id\":1,\"title\":\"New Book\",\"price\":150,\"publishStatus\":true,\"authorIds\":[99]}",
+                ),
         )
             .andExpect(status().isNotFound)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -134,7 +139,8 @@ class BookControllerTest(
             put("/lib-store/v1.0/books/{bookId}", 1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
-                    "{\"id\":1,\"title\":\"x\",\"price\":1,\"publishStatus\":true,\"authorIds\":[]}")
+                    "{\"id\":1,\"title\":\"x\",\"price\":1,\"publishStatus\":true,\"authorIds\":[]}",
+                ),
         )
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("$.error").value("authorIds: size must be between 1 and 50"))
@@ -147,7 +153,8 @@ class BookControllerTest(
             put("/lib-store/v1.0/books/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
-                    "{\"title\":\"New Book\",\"price\":150,\"publishStatus\":true,\"authorIds\":[99]}")
+                    "{\"title\":\"New Book\",\"price\":150,\"publishStatus\":true,\"authorIds\":[99]}",
+                ),
         )
             .andExpect(status().isNotFound)
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -161,13 +168,13 @@ class BookControllerTest(
 
         mockMvc.perform(
             delete("/lib-store/v1.0/books/{bookId}", 1)
-                .contentType(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON),
         )
             .andExpect(status().isOk)
 
         mockMvc.perform(
             get("/lib-store/v1.0/books/{bookId}", 1)
-                .contentType(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON),
         )
             .andExpect(status().isNotFound)
     }
