@@ -1,6 +1,7 @@
 package com.demo.project.librarystore.config
 
 import com.demo.project.librarystore.exception.ResourceNotFoundException
+import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import org.apache.coyote.BadRequestException
 import org.jooq.exception.DataAccessException
@@ -42,8 +43,8 @@ class ExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mapOf("error" to "Invalid date format."))
     }
 
-    @ExceptionHandler(MissingKotlinParameterException::class)
-    fun handleMismatchedInputException(ex: MissingKotlinParameterException): ResponseEntity<Any> {
+    @ExceptionHandler(MismatchedInputException::class)
+    fun handleMismatchedInputException(ex: MismatchedInputException): ResponseEntity<Any> {
         logger.info("Mismatched input exception", ex)
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mapOf("error" to "Missing input."))
     }
