@@ -23,16 +23,6 @@ class BookController(
     private val bookService: BookService,
 ) {
     @Operation(
-        summary = "Get all books",
-        description = "Get all books."
-    )
-    @GetMapping("/books")
-    fun getAllBooks(): List<BookModel> {
-        // TODO: Support offset and limit.
-        return bookService.getAllBooks()
-    }
-
-    @Operation(
         summary = "Get book by ID",
         description = "Get book by ID. Fails if the book does not exist."
     )

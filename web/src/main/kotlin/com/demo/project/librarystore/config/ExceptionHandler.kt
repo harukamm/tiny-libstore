@@ -48,6 +48,6 @@ class ExceptionHandler {
     }
 
     companion object {
-        val logger: Logger = LoggerFactory.getLogger(ExceptionHandler::class.java)
+        private val logger: Logger = LoggerFactory.getLogger(ExceptionHandler::class.java)
     }
 }

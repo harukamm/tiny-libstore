@@ -35,7 +35,7 @@ data class CreateAuthorRequest(
     @field:NotBlank
     val name: String,
     @field:NotBlank
-    @DateTimeFormat(pattern = "yyyyMMdd")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     val birthDay: LocalDate,
 )
 
@@ -43,6 +43,6 @@ data class UpdateAuthorRequest(
     @field:NotBlank
     val name: String?,
     @field:NotBlank
-    @DateTimeFormat(pattern = "yyyyMMdd")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     val birthDay: LocalDate?,
 )

@@ -14,10 +14,6 @@ import org.springframework.stereotype.Service
 class BookService(
     private val bookRepository: BookRepository,
 ) {
-    fun getAllBooks(): List<BookModel> {
-        throw NotImplementedException("tobe")
-    }
-
     fun getBookByIdOrThrow(bookId: Int): BookModel {
         bookRepository.getBookById(bookId)?.let {
             return it.toModel()
