@@ -1,6 +1,7 @@
 package com.demo.project.librarystore.controller.request
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.validation.constraints.AssertTrue
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotNull
@@ -39,6 +40,7 @@ data class CreateAuthorRequest(
     @JsonFormat(pattern = "yyyy-MM-dd")
     val birthDay: LocalDate,
 ) {
+    @JsonIgnore
     @AssertTrue(message = "Only past dates are allowed.")
     fun isPastDate(): Boolean {
         return birthDay.isBefore(LocalDate.now())
@@ -51,6 +53,7 @@ data class UpdateAuthorRequest(
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     val birthDay: LocalDate?,
 ) {
+    @JsonIgnore
     @AssertTrue(message = "Only past dates are allowed.")
     fun isPastDate(): Boolean {
         return birthDay == null || birthDay.isBefore(LocalDate.now())
