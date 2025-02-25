@@ -1,7 +1,7 @@
 package com.demo.project.librarystore.service
 
 import com.demo.project.librarystore.entity.Author
-import com.demo.project.librarystore.exception.ResourceNotFoundException
+import com.demo.project.librarystore.exception.ResourceNotFoundBaseException
 import com.demo.project.librarystore.repository.AuthorRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
@@ -49,7 +49,7 @@ class AuthorServiceMockTest {
             .getAuthorById(10)
 
         val e =
-            Assertions.assertThrows(ResourceNotFoundException::class.java) {
+            Assertions.assertThrows(ResourceNotFoundBaseException::class.java) {
                 service.getAuthorByIdOrThrow(10)
             }
         assertThat(e.message).isEqualTo("Author not found.")
@@ -112,7 +112,7 @@ class AuthorServiceMockTest {
             .getAuthorById(anyInt())
 
         val e =
-            Assertions.assertThrows(ResourceNotFoundException::class.java) {
+            Assertions.assertThrows(ResourceNotFoundBaseException::class.java) {
                 service.updateAuthor(1, "Updated Author", LocalDate.of(1992, 2, 2))
             }
         assertThat(e.message).isEqualTo("Author not found.")
@@ -120,10 +120,9 @@ class AuthorServiceMockTest {
 
     @Test
     fun `deleteAuthorById deletes existing author`() {
-        val author = Author(1, "Test Author", LocalDate.of(1991, 1, 1))
-        lenient().doReturn(author)
+        lenient().doReturn(1)
             .`when`(authorRepository)
-            .getAuthorById(anyInt())
+            .deleteAuthor(anyInt())
 
         service.deleteAuthorById(1)
 
@@ -133,12 +132,12 @@ class AuthorServiceMockTest {
 
     @Test
     fun `deleteAuthorById fails when author not found`() {
-        lenient().doReturn(null)
+        lenient().doReturn(0)
             .`when`(authorRepository)
-            .getAuthorById(anyInt())
+            .deleteAuthor(anyInt())
 
         val e =
-            Assertions.assertThrows(ResourceNotFoundException::class.java) {
+            Assertions.assertThrows(ResourceNotFoundBaseException::class.java) {
                 service.deleteAuthorById(1)
             }
         assertThat(e.message).isEqualTo("Author not found.")

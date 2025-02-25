@@ -68,9 +68,9 @@ class AuthorRepository(private val context: DSLContext) {
         }
     }
 
-    fun deleteAuthor(id: Int) {
+    fun deleteAuthor(id: Int): Int {
         // book-author entities are deleted by ON DELETE CASCADE
-        context.deleteFrom(AUTHOR)
+        return context.deleteFrom(AUTHOR)
             .where(AUTHOR.ID.eq(id))
             .execute()
     }

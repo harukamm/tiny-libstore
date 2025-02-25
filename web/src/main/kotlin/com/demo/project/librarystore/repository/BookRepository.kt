@@ -122,9 +122,9 @@ class BookRepository(
         }
     }
 
-    fun deleteBookById(id: Int) {
+    fun deleteBookById(id: Int): Int {
         // book-author entities are deleted by ON DELETE CASCADE
-        context.deleteFrom(BOOK)
+        return context.deleteFrom(BOOK)
             .where(BOOK.ID.eq(id))
             .execute()
     }

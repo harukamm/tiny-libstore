@@ -114,9 +114,19 @@ class AuthorRepositoryTest(
     @Test
     fun `deleteAuthor deletes author successfully`() {
         val authorId = createAuthor(1, "Author to Delete", LocalDate.of(1970, 1, 1))
-        repository.deleteAuthor(authorId)
+
+        val res = repository.deleteAuthor(authorId)
+
+        assertThat(res).isEqualTo(1)
         val deletedAuthor = repository.getAuthorById(authorId)
         assertThat(deletedAuthor).isNull()
+    }
+
+    @Test
+    fun `deleteAuthor returns zero when author not found`() {
+        val res = repository.deleteAuthor(1)
+
+        assertThat(res).isEqualTo(0)
     }
 
     @Test
@@ -127,8 +137,9 @@ class AuthorRepositoryTest(
         createBookAuthor(bookId, authorId)
         createBookAuthor(bookId, authorIdToDelete)
 
-        repository.deleteAuthor(authorIdToDelete)
+        val res = repository.deleteAuthor(authorIdToDelete)
 
+        assertThat(res).isEqualTo(1)
         assertThat(repository.getAuthorById(authorIdToDelete)).isNull()
         assertThat(repository.getAuthorById(authorId)).isNotNull
         val authorsCountOfBook = getBookAuthorsRecordCount(bookId)

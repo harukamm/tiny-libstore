@@ -2,7 +2,8 @@ package com.demo.project.librarystore.service
 
 import com.demo.project.librarystore.entity.Author
 import com.demo.project.librarystore.entity.Book
-import com.demo.project.librarystore.exception.ResourceNotFoundException
+import com.demo.project.librarystore.exception.IdAlreadyExistsBaseException
+import com.demo.project.librarystore.exception.ResourceNotFoundBaseException
 import com.demo.project.librarystore.repository.AuthorRepository
 import com.demo.project.librarystore.repository.BookRepository
 import org.apache.coyote.BadRequestException
@@ -18,6 +19,7 @@ import org.mockito.Mockito.verify
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
+import org.springframework.dao.DuplicateKeyException
 
 @ActiveProfiles("TEST")
 @SpringBootTest
@@ -55,7 +57,7 @@ class BookServiceMockTest {
             .getBookById(anyInt())
 
         val e =
-            Assertions.assertThrows(ResourceNotFoundException::class.java) {
+            Assertions.assertThrows(ResourceNotFoundBaseException::class.java) {
                 service.getBookByIdOrThrow(10)
             }
 
@@ -88,13 +90,16 @@ class BookServiceMockTest {
 
     @Test
     fun `createBook fails if id is already taken`() {
-        val author = Author(1, "Test Author", LocalDate.of(1991, 1, 1))
-        lenient().doReturn(Book(10, "Test Book", 100, true, listOf(author)))
+        Author(1, "Test Author", LocalDate.of(1991, 1, 1))
+        lenient().doReturn(true)
+            .`when`(authorRepository)
+            .checkAllAuthorsExist(listOf(1))
+        lenient().doThrow(DuplicateKeyException::class.java)
             .`when`(bookRepository)
-            .getBookById(anyInt())
+            .createBook(10, "Test Book", 100, true, listOf(1))
 
         val e =
-            Assertions.assertThrows(BadRequestException::class.java) {
+            Assertions.assertThrows(IdAlreadyExistsBaseException::class.java) {
                 service.createBook(10, "Test Book", 100, true, listOf(1))
             }
 
@@ -127,7 +132,7 @@ class BookServiceMockTest {
             .checkAllAuthorsExist(listOf(1))
 
         val e =
-            Assertions.assertThrows(ResourceNotFoundException::class.java) {
+            Assertions.assertThrows(ResourceNotFoundBaseException::class.java) {
                 service.updateBook(1, "Updated Title", 200, false, listOf(1))
             }
 
@@ -166,14 +171,27 @@ class BookServiceMockTest {
 
     @Test
     fun `deleteBookById works correctly`() {
-        val author = Author(2, "Test Author", LocalDate.of(1991, 1, 1))
-        lenient().doReturn(Book(1, "Title", 50, true, listOf(author)))
+        lenient().doReturn(1)
             .`when`(bookRepository)
-            .getBookById(1)
+            .deleteBookById(123)
 
-        service.deleteBookById(1)
+        service.deleteBookById(123)
 
         verify(bookRepository, times(1))
-            .deleteBookById(1)
+            .deleteBookById(123)
+    }
+
+    @Test
+    fun `deleteBookById throws error if there's nothing to delete`() {
+        lenient().doReturn(0)
+            .`when`(bookRepository)
+            .deleteBookById(123)
+
+        Assertions.assertThrows(ResourceNotFoundBaseException::class.java) {
+            service.deleteBookById(123)
+        }
+
+        verify(bookRepository, times(1))
+            .deleteBookById(123)
     }
 }

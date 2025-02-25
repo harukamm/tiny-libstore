@@ -1,6 +1,6 @@
 package com.demo.project.librarystore.config
 
-import com.demo.project.librarystore.exception.ResourceNotFoundException
+import com.demo.project.librarystore.exception.AppBaseException
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import org.apache.coyote.BadRequestException
 import org.jooq.exception.DataAccessException
@@ -17,10 +17,10 @@ import java.time.format.DateTimeParseException
 
 @ControllerAdvice
 class ExceptionHandler {
-    @ExceptionHandler(ResourceNotFoundException::class)
-    fun handleResourceNotFoundException(ex: ResourceNotFoundException): ResponseEntity<Any> {
-        logger.info("Resource not found", ex)
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(mapOf("error" to ex.message))
+    @ExceptionHandler(AppBaseException::class)
+    fun handleResourceNotFoundException(ex: AppBaseException): ResponseEntity<Any> {
+        logger.info("app-defined exception", ex)
+        return ResponseEntity.status(ex.httpStatusCode).body(mapOf("error" to ex.message))
     }
 
     @ExceptionHandler(BadRequestException::class)

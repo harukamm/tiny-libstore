@@ -1,7 +1,7 @@
 package com.demo.project.librarystore.service
 
-import com.demo.project.librarystore.entity.Book
-import com.demo.project.librarystore.exception.ResourceNotFoundException
+import com.demo.project.librarystore.exception.IdAlreadyExistsBaseException
+import com.demo.project.librarystore.exception.ResourceNotFoundBaseException
 import com.demo.project.librarystore.model.BookModel
 import com.demo.project.librarystore.model.toModel
 import com.demo.project.librarystore.repository.AuthorRepository
@@ -9,6 +9,7 @@ import com.demo.project.librarystore.repository.BookRepository
 import org.apache.coyote.BadRequestException
 import org.springframework.stereotype.Service
 import java.lang.RuntimeException
+import org.springframework.dao.DuplicateKeyException
 
 @Service
 class BookService(
@@ -18,7 +19,7 @@ class BookService(
     fun getBookByIdOrThrow(bookId: Int): BookModel {
         bookRepository.getBookById(bookId)?.let {
             return it.toModel()
-        } ?: throw ResourceNotFoundException("Book not found.")
+        } ?: throw ResourceNotFoundBaseException("Book not found.")
     }
 
     fun createBook(
@@ -28,13 +29,13 @@ class BookService(
         publishedStatus: Boolean,
         authorIds: List<Int>,
     ): Int {
-        val exist: Book? = bookRepository.getBookById(id)
-        if (exist != null) {
-            throw BadRequestException("Book id already used.")
-        }
         validateBookAuthorIds(authorIds, false)
-        return bookRepository.createBook(id, title, price, publishedStatus, authorIds)
-            ?: throw RuntimeException("Book not created")
+        try {
+            return bookRepository.createBook(id, title, price, publishedStatus, authorIds)
+                ?: throw RuntimeException("Book not created.")
+        } catch (e: DuplicateKeyException) {
+            throw IdAlreadyExistsBaseException("Book id already used.")
+        }
     }
 
     fun updateBook(
@@ -49,13 +50,14 @@ class BookService(
         if (exist.publishedStatus && publishedStatus == false) {
             throw BadRequestException("Book cannot be changed to unpublished status.")
         }
-
         bookRepository.updateBook(id, title, price, publishedStatus, authorIds)
     }
 
     fun deleteBookById(id: Int) {
-        getBookByIdOrThrow(id)
-        bookRepository.deleteBookById(id)
+        val deletedCount = bookRepository.deleteBookById(id)
+        if (deletedCount == 0) {
+            throw ResourceNotFoundBaseException("Book not found.")
+        }
     }
 
     fun getBooksByAuthorId(authorId: Int): List<BookModel> {
@@ -79,7 +81,7 @@ class BookService(
             throw BadRequestException("Includes duplicate author.")
         }
         if (!authorRepository.checkAllAuthorsExist(authorIds)) {
-            throw ResourceNotFoundException("Includes non-existent author.")
+            throw ResourceNotFoundBaseException("Includes non-existent author.")
         }
     }
 }

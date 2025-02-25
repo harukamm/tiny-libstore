@@ -103,6 +103,19 @@ class AuthorControllerTest(
     }
 
     @Test
+    fun `create author fails if the id is already in use`() {
+        authorService.createAuthor(1, "Test Author 1", LocalDate.of(1991, 1, 1))
+
+        mockMvc.perform(
+            post("/lib-store/v1.0/authors")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"id\": 1, \"name\": \"Test Author\", \"birthDay\": \"1991-01-01\"}"),
+        )
+            .andExpect(status().isConflict)
+            .andExpect(jsonPath("$.error").value("Author id already used."))
+    }
+
+    @Test
     fun `should updates author birthday`() {
         authorService.createAuthor(1, "Test Author 1", LocalDate.of(1991, 1, 1))
 

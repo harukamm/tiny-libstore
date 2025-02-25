@@ -1,12 +1,14 @@
 package com.demo.project.librarystore.service
 
-import com.demo.project.librarystore.exception.ResourceNotFoundException
+import com.demo.project.librarystore.exception.IdAlreadyExistsBaseException
+import com.demo.project.librarystore.exception.ResourceNotFoundBaseException
 import com.demo.project.librarystore.model.AuthorModel
 import com.demo.project.librarystore.model.toModel
 import com.demo.project.librarystore.repository.AuthorRepository
 import org.springframework.stereotype.Service
 import java.lang.RuntimeException
 import java.time.LocalDate
+import org.springframework.dao.DuplicateKeyException
 
 @Service
 class AuthorService(
@@ -18,7 +20,7 @@ class AuthorService(
 
     fun getAuthorByIdOrThrow(id: Int): AuthorModel {
         return authorRepository.getAuthorById(id)?.toModel()
-            ?: throw ResourceNotFoundException("Author not found.")
+            ?: throw ResourceNotFoundBaseException("Author not found.")
     }
 
     fun getAuthorByName(name: String): List<AuthorModel> {
@@ -30,11 +32,12 @@ class AuthorService(
         name: String,
         birthDate: LocalDate,
     ): Int {
-        authorRepository.getAuthorById(id)?.let {
-            throw ResourceNotFoundException("Author id already used.")
+        try {
+            return authorRepository.createAuthor(id, name, birthDate)
+                ?: throw RuntimeException("Author not created.")
+        } catch (e: DuplicateKeyException) {
+            throw IdAlreadyExistsBaseException("Author id already used.")
         }
-        return authorRepository.createAuthor(id, name, birthDate)
-            ?: throw RuntimeException("Author not created.")
     }
 
     fun updateAuthor(
@@ -47,7 +50,9 @@ class AuthorService(
     }
 
     fun deleteAuthorById(id: Int) {
-        getAuthorByIdOrThrow(id)
-        authorRepository.deleteAuthor(id)
+        val deletedCount = authorRepository.deleteAuthor(id)
+        if (deletedCount == 0) {
+            throw ResourceNotFoundBaseException("Author not found.")
+        }
     }
 }

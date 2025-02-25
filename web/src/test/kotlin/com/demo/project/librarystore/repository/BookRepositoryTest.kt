@@ -166,10 +166,18 @@ class BookRepositoryTest(
         createBookAuthor(bookId, authorId1)
         createBookAuthor(bookId, authorId2)
 
-        repository.deleteBookById(bookId)
+        val res = repository.deleteBookById(bookId)
 
+        assertThat(res).isEqualTo(1)
         val book = repository.getBookById(1)
         assertThat(book).isNull()
+    }
+
+    @Test
+    fun `deleteBookById returns zero when book not found`() {
+        val res = repository.deleteBookById(1)
+
+        assertThat(res).isEqualTo(0)
     }
 
     @Test
@@ -180,8 +188,9 @@ class BookRepositoryTest(
         createBookAuthor(bookId, authorId1)
         createBookAuthor(bookId, authorId2)
 
-        repository.deleteBookById(bookId)
+        val res = repository.deleteBookById(bookId)
 
+        assertThat(res).isEqualTo(1)
         val exist = repository.getBookById(bookId)
         assertThat(exist).isNull()
         val authorsCountOfBook = getBookAuthorsRecordCount(bookId)
