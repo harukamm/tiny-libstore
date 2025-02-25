@@ -178,6 +178,45 @@ class AuthorControllerTest(
             .andExpect(status().isOk)
     }
 
+    @Test
+    fun `call with invalid type in path variable`() {
+        mockMvc.perform(
+            get("/lib-store/v1.0/authors/undefined")
+                .contentType(MediaType.APPLICATION_JSON),
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.error").value("Expected type int for authorId"))
+    }
+
+    @Test
+    fun `call with wrong method`() {
+        mockMvc.perform(
+            post("/lib-store/v1.0/authors/1")
+                .contentType(MediaType.APPLICATION_JSON),
+        )
+            .andExpect(status().isMethodNotAllowed)
+    }
+
+    @Test
+    fun `call with wrong content type`() {
+        mockMvc.perform(
+            post("/lib-store/v1.0/authors")
+                .contentType(MediaType.APPLICATION_XML),
+        )
+            .andExpect(status().isUnsupportedMediaType)
+    }
+
+    @Test
+    fun `call with wrong path`() {
+        mockMvc.perform(
+            post("/lib-store/v1.0")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"id\": 123}"),
+        )
+            .andExpect(status().isNotFound)
+    }
+
     companion object {
         private val logger: Logger = LoggerFactory.getLogger(BookControllerTest::class.java)
     }
