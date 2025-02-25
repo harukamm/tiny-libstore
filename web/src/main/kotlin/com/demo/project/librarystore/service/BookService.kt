@@ -1,7 +1,7 @@
 package com.demo.project.librarystore.service
 
-import com.demo.project.librarystore.exception.IdAlreadyExistsBaseException
-import com.demo.project.librarystore.exception.ResourceNotFoundBaseException
+import com.demo.project.librarystore.exception.IdAlreadyExistsException
+import com.demo.project.librarystore.exception.ResourceNotFoundException
 import com.demo.project.librarystore.model.BookModel
 import com.demo.project.librarystore.model.toModel
 import com.demo.project.librarystore.repository.AuthorRepository
@@ -19,7 +19,7 @@ class BookService(
     fun getBookByIdOrThrow(bookId: Int): BookModel {
         bookRepository.getBookById(bookId)?.let {
             return it.toModel()
-        } ?: throw ResourceNotFoundBaseException("Book not found.")
+        } ?: throw ResourceNotFoundException("Book not found.")
     }
 
     fun createBook(
@@ -34,7 +34,7 @@ class BookService(
             return bookRepository.createBook(id, title, price, publishedStatus, authorIds)
                 ?: throw RuntimeException("Book not created.")
         } catch (e: DuplicateKeyException) {
-            throw IdAlreadyExistsBaseException("Book id already used.")
+            throw IdAlreadyExistsException("Book id already used.")
         }
     }
 
@@ -56,7 +56,7 @@ class BookService(
     fun deleteBookById(id: Int) {
         val deletedCount = bookRepository.deleteBookById(id)
         if (deletedCount == 0) {
-            throw ResourceNotFoundBaseException("Book not found.")
+            throw ResourceNotFoundException("Book not found.")
         }
     }
 
@@ -81,7 +81,7 @@ class BookService(
             throw BadRequestException("Includes duplicate author.")
         }
         if (!authorRepository.checkAllAuthorsExist(authorIds)) {
-            throw ResourceNotFoundBaseException("Includes non-existent author.")
+            throw ResourceNotFoundException("Includes non-existent author.")
         }
     }
 }

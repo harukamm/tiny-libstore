@@ -1,7 +1,7 @@
 package com.demo.project.librarystore.service
 
 import com.demo.project.librarystore.entity.Author
-import com.demo.project.librarystore.exception.ResourceNotFoundBaseException
+import com.demo.project.librarystore.exception.ResourceNotFoundException
 import com.demo.project.librarystore.repository.AuthorRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
@@ -49,7 +49,7 @@ class AuthorServiceMockTest {
             .getAuthorById(10)
 
         val e =
-            Assertions.assertThrows(ResourceNotFoundBaseException::class.java) {
+            Assertions.assertThrows(ResourceNotFoundException::class.java) {
                 service.getAuthorByIdOrThrow(10)
             }
         assertThat(e.message).isEqualTo("Author not found.")
@@ -112,7 +112,7 @@ class AuthorServiceMockTest {
             .getAuthorById(anyInt())
 
         val e =
-            Assertions.assertThrows(ResourceNotFoundBaseException::class.java) {
+            Assertions.assertThrows(ResourceNotFoundException::class.java) {
                 service.updateAuthor(1, "Updated Author", LocalDate.of(1992, 2, 2))
             }
         assertThat(e.message).isEqualTo("Author not found.")
@@ -137,7 +137,7 @@ class AuthorServiceMockTest {
             .deleteAuthor(anyInt())
 
         val e =
-            Assertions.assertThrows(ResourceNotFoundBaseException::class.java) {
+            Assertions.assertThrows(ResourceNotFoundException::class.java) {
                 service.deleteAuthorById(1)
             }
         assertThat(e.message).isEqualTo("Author not found.")

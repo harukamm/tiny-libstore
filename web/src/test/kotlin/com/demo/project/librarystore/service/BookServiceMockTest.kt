@@ -2,8 +2,8 @@ package com.demo.project.librarystore.service
 
 import com.demo.project.librarystore.entity.Author
 import com.demo.project.librarystore.entity.Book
-import com.demo.project.librarystore.exception.IdAlreadyExistsBaseException
-import com.demo.project.librarystore.exception.ResourceNotFoundBaseException
+import com.demo.project.librarystore.exception.IdAlreadyExistsException
+import com.demo.project.librarystore.exception.ResourceNotFoundException
 import com.demo.project.librarystore.repository.AuthorRepository
 import com.demo.project.librarystore.repository.BookRepository
 import org.apache.coyote.BadRequestException
@@ -57,7 +57,7 @@ class BookServiceMockTest {
             .getBookById(anyInt())
 
         val e =
-            Assertions.assertThrows(ResourceNotFoundBaseException::class.java) {
+            Assertions.assertThrows(ResourceNotFoundException::class.java) {
                 service.getBookByIdOrThrow(10)
             }
 
@@ -99,7 +99,7 @@ class BookServiceMockTest {
             .createBook(10, "Test Book", 100, true, listOf(1))
 
         val e =
-            Assertions.assertThrows(IdAlreadyExistsBaseException::class.java) {
+            Assertions.assertThrows(IdAlreadyExistsException::class.java) {
                 service.createBook(10, "Test Book", 100, true, listOf(1))
             }
 
@@ -132,7 +132,7 @@ class BookServiceMockTest {
             .checkAllAuthorsExist(listOf(1))
 
         val e =
-            Assertions.assertThrows(ResourceNotFoundBaseException::class.java) {
+            Assertions.assertThrows(ResourceNotFoundException::class.java) {
                 service.updateBook(1, "Updated Title", 200, false, listOf(1))
             }
 
@@ -187,7 +187,7 @@ class BookServiceMockTest {
             .`when`(bookRepository)
             .deleteBookById(123)
 
-        Assertions.assertThrows(ResourceNotFoundBaseException::class.java) {
+        Assertions.assertThrows(ResourceNotFoundException::class.java) {
             service.deleteBookById(123)
         }
 

@@ -1,7 +1,7 @@
 package com.demo.project.librarystore.service
 
-import com.demo.project.librarystore.exception.IdAlreadyExistsBaseException
-import com.demo.project.librarystore.exception.ResourceNotFoundBaseException
+import com.demo.project.librarystore.exception.IdAlreadyExistsException
+import com.demo.project.librarystore.exception.ResourceNotFoundException
 import com.demo.project.librarystore.model.AuthorModel
 import com.demo.project.librarystore.model.toModel
 import com.demo.project.librarystore.repository.AuthorRepository
@@ -20,7 +20,7 @@ class AuthorService(
 
     fun getAuthorByIdOrThrow(id: Int): AuthorModel {
         return authorRepository.getAuthorById(id)?.toModel()
-            ?: throw ResourceNotFoundBaseException("Author not found.")
+            ?: throw ResourceNotFoundException("Author not found.")
     }
 
     fun getAuthorByName(name: String): List<AuthorModel> {
@@ -36,7 +36,7 @@ class AuthorService(
             return authorRepository.createAuthor(id, name, birthDate)
                 ?: throw RuntimeException("Author not created.")
         } catch (e: DuplicateKeyException) {
-            throw IdAlreadyExistsBaseException("Author id already used.")
+            throw IdAlreadyExistsException("Author id already used.")
         }
     }
 
@@ -52,7 +52,7 @@ class AuthorService(
     fun deleteAuthorById(id: Int) {
         val deletedCount = authorRepository.deleteAuthor(id)
         if (deletedCount == 0) {
-            throw ResourceNotFoundBaseException("Author not found.")
+            throw ResourceNotFoundException("Author not found.")
         }
     }
 }
