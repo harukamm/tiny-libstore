@@ -21,7 +21,7 @@ To start the web application, execute the following command:
 ./gradlew :web:bootRun
 ```
 
-This command will also generate Jooq classes under the `database/build/generated-sources/jooq` directory.
+This command will also initialize database using Flyway and generate Jooq classes under the `database/build/generated-sources/jooq` directory.
 
 The application runs on 8080 port by default.
 You can access the Swagger UI at:

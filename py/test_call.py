@@ -1,5 +1,5 @@
 # Description: This script is for manual testing.
-# Run `DELETE from BOOK; DELETE from AUTHOR;` at psql before running this script.
+# Run `DELETE from BOOK; DELETE from AUTHOR;` at psql if test fails at the middle.
 
 import requests
 import logging
