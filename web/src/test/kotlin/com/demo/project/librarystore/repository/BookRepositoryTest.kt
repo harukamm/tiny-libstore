@@ -91,6 +91,18 @@ class BookRepositoryTest(
     }
 
     @Test
+    fun `isThereAssociatedBook returns true when book of author exists`() {
+        val bookId = createBook(1, "Test Book", 42, false)
+        val authorId = createAuthor(1, "Test Author", LocalDate.of(1991, 1, 1))
+        createBookAuthor(bookId, authorId)
+        createAuthor(2, "Test Author 2", LocalDate.of(1992, 2, 2))
+
+        assertThat(repository.isThereAssociatedBook(1)).isTrue()
+        assertThat(repository.isThereAssociatedBook(2)).isFalse()
+        assertThat(repository.isThereAssociatedBook(333)).isFalse()
+    }
+
+    @Test
     fun `createBook creates book successfully`() {
         val authorId1 = createAuthor(1, "Test Author 1", LocalDate.of(1991, 1, 1))
         val authorId2 = createAuthor(2, "Test Author 2", LocalDate.of(1992, 2, 2))

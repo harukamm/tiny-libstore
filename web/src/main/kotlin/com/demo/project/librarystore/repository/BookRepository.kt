@@ -35,6 +35,14 @@ class BookRepository(
             .fetchInto(Book::class.java)
     }
 
+    fun isThereAssociatedBook(authorId: Int): Boolean {
+        return context.fetchExists(
+            context.selectOne()
+                .from(BOOK_AUTHOR)
+                .where(BOOK_AUTHOR.AUTHOR_ID.eq(authorId))
+        )
+    }
+
     private fun selectBooksWithAuthors(ctx: DSLContext): SelectJoinStep<*> {
         return ctx.select(
             BOOK.ID,

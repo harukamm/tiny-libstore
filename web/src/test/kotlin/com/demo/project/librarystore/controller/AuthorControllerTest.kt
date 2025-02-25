@@ -3,6 +3,7 @@ package com.demo.project.librarystore.controller
 import com.demo.project.librarystore.JooqIntegrationBase
 import com.demo.project.librarystore.config.ExceptionHandler
 import com.demo.project.librarystore.service.AuthorService
+import com.demo.project.librarystore.service.BookService
 import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Matchers
 import org.jooq.DSLContext
@@ -23,12 +24,14 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPat
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import java.time.LocalDate
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 
 @SpringBootTest
 @ActiveProfiles("TEST")
 class AuthorControllerTest(
     @Autowired private val controller: AuthorController,
     @Autowired private val authorService: AuthorService,
+    @Autowired private val bookService: BookService,
     @Autowired private val dslContext: DSLContext,
 ) : JooqIntegrationBase(dslContext) {
     private lateinit var mockMvc: MockMvc
@@ -141,6 +144,38 @@ class AuthorControllerTest(
         )
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("$.error").value("name: size must be between 1 and 200"))
+    }
+
+    @Test
+    fun `delete author fails with unknown author id`() {
+        mockMvc.perform(
+            delete("/lib-store/v1.0/authors/999")
+                .contentType(MediaType.APPLICATION_JSON),
+        )
+            .andExpect(status().isNotFound)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.error").value("Author not found."))
+    }
+
+    @Test
+    fun `delete author only if no associated books`() {
+        authorService.createAuthor(1, "Test Author 1", LocalDate.of(1991, 1, 1))
+        authorService.createAuthor(2, "Test Author 2", LocalDate.of(1992, 2, 2))
+        bookService.createBook(1, "Title1", 100, true, listOf(1))
+
+        mockMvc.perform(
+            delete("/lib-store/v1.0/authors/1")
+                .contentType(MediaType.APPLICATION_JSON),
+        )
+            .andExpect(status().isForbidden)
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.error").value("Author has associated books."))
+
+        mockMvc.perform(
+            delete("/lib-store/v1.0/authors/2")
+                .contentType(MediaType.APPLICATION_JSON),
+        )
+            .andExpect(status().isOk)
     }
 
     companion object {

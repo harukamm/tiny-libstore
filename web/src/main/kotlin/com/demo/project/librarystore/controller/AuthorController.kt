@@ -70,7 +70,7 @@ class AuthorController(
 
     @Operation(
         summary = "Delete author",
-        description = "Delete author by ID. Fails if the author does not exist.",
+        description = "Delete author by ID. Fails if the author does not exist or has associated books.",
     )
     @DeleteMapping("/authors/{authorId}")
     fun deleteAuthor(

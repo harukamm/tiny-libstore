@@ -3,6 +3,7 @@ package com.demo.project.librarystore.service
 import com.demo.project.librarystore.entity.Author
 import com.demo.project.librarystore.exception.ResourceNotFoundException
 import com.demo.project.librarystore.repository.AuthorRepository
+import com.demo.project.librarystore.repository.BookRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -20,12 +21,14 @@ import java.time.LocalDate
 @SpringBootTest
 class AuthorServiceMockTest {
     private lateinit var authorRepository: AuthorRepository
+    private lateinit var bookRepository: BookRepository
     private lateinit var service: AuthorService
 
     @BeforeEach
     fun setup() {
         authorRepository = Mockito.mock(AuthorRepository::class.java)
-        service = AuthorService(authorRepository)
+        bookRepository = Mockito.mock(BookRepository::class.java)
+        service = AuthorService(authorRepository, bookRepository)
     }
 
     @Test
