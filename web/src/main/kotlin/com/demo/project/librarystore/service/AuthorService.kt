@@ -7,10 +7,10 @@ import com.demo.project.librarystore.model.AuthorModel
 import com.demo.project.librarystore.model.toModel
 import com.demo.project.librarystore.repository.AuthorRepository
 import com.demo.project.librarystore.repository.BookRepository
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.stereotype.Service
 import java.lang.RuntimeException
 import java.time.LocalDate
-import org.springframework.dao.DuplicateKeyException
 
 @Service
 class AuthorService(

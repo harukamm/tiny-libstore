@@ -2,8 +2,6 @@ package com.demo.project.librarystore.config
 
 import com.demo.project.librarystore.exception.AppBaseException
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
-import java.sql.SQLException
-import java.time.format.DateTimeParseException
 import org.apache.coyote.BadRequestException
 import org.jooq.exception.DataAccessException
 import org.slf4j.Logger
@@ -19,6 +17,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.servlet.NoHandlerFoundException
 import org.springframework.web.servlet.resource.NoResourceFoundException
+import java.sql.SQLException
+import java.time.format.DateTimeParseException
 
 @ControllerAdvice
 class ExceptionHandler {

@@ -4,6 +4,6 @@ import org.springframework.http.HttpStatus
 
 class IdAlreadyExistsException(message: String) : AppBaseException(message, HttpStatus.CONFLICT) {
     companion object {
-        private const  val serialVersionUID = -7883L
+        private const val serialVersionUID = -7883L
     }
 }

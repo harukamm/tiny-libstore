@@ -17,9 +17,9 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDate
-import org.springframework.dao.DuplicateKeyException
 
 @ActiveProfiles("TEST")
 @SpringBootTest

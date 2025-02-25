@@ -2,7 +2,6 @@ package com.demo.project.librarystore.repository
 
 import com.demo.project.librarystore.entity.Author
 import com.demo.project.librarystore.jooq.generated.tables.references.AUTHOR
-import com.demo.project.librarystore.jooq.generated.tables.references.BOOK_AUTHOR
 import org.jooq.DSLContext
 import org.springframework.stereotype.Repository
 import java.time.LocalDate

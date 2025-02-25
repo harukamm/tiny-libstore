@@ -7,9 +7,9 @@ import com.demo.project.librarystore.model.toModel
 import com.demo.project.librarystore.repository.AuthorRepository
 import com.demo.project.librarystore.repository.BookRepository
 import org.apache.coyote.BadRequestException
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.stereotype.Service
 import java.lang.RuntimeException
-import org.springframework.dao.DuplicateKeyException
 
 @Service
 class BookService(

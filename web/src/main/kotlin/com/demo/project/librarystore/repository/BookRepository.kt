@@ -39,7 +39,7 @@ class BookRepository(
         return context.fetchExists(
             context.selectOne()
                 .from(BOOK_AUTHOR)
-                .where(BOOK_AUTHOR.AUTHOR_ID.eq(authorId))
+                .where(BOOK_AUTHOR.AUTHOR_ID.eq(authorId)),
         )
     }
 
